@@ -6,6 +6,9 @@ const pool = new Pool({
     database: 'FitnessClub',
     password: 'postgres',
     port: 5432,
+    ssl: {
+        rejectUnauthorized: false,
+    }
 });
 
 // const pool = new Pool({          //local
