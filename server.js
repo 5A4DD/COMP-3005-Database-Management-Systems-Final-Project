@@ -8,6 +8,14 @@ const pool = new Pool({
     port: 5432,
 });
 
+// const pool = new Pool({          //local
+//     user: 'postgres',
+//     host: 'localhost',
+//     database: 'FitnessClub',
+//     password: 'postgres',
+//     port: 5432,
+// });
+
 async function getMembers() {
     try {
         const res = await pool.query('SELECT * FROM Member'); // Example query
