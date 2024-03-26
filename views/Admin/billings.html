@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Billings - Momentum Fitness Center</title>
+    <link rel="stylesheet" href="../../styles/styles.css">
+</head>
+<body>
+    <header>
+        <h1>Momentum Fitness Center</h1>
+        <nav>
+            <ul>
+              <li><a href="room-booking.html">Room Bookings</a></li>
+              <li><a href="">Equipment Maintenance</a></li>
+              <li><a href="">Class Schedules</a></li>
+              <li><a href="billings.html">Billings</a></li>
+            </ul>
+          </nav>
+    </header>
+    <main>
+        <h2>Generate Invoice</h2>
+        <form id="invoiceForm">
+          <label for="memberID">Member ID:</label>
+          <input type="text" id="memberID" name="memberID" required>
+
+          <label for="date">Issuing Date:</label>
+          <input type="date" id="date" name="date" required><br><br>
+
+          <label for="itemName">Item Name:</label>
+          <input type="text" id="itemName" name="itemName" required><br>
+
+          <label for="itemPrice">Item Price:</label>
+          <input type="number" id="itemPrice" name="itemPrice" min="0" step="0.01" required><br>
+
+          <label for="description">Description:</label>
+          <input type="text" id="description" name="description" required><br>
+
+          <input type="submit" value="Add to Cart"><br><br>
+        </form>
+
+        <table id="cart">
+          <thead>
+              <tr>
+                  <th>Item Name</th>
+                  <th>Item Price</th>
+                  <th>Description</th>
+              </tr>
+          </thead>
+          <tbody id="cartBody"></tbody>
+        </table><br>
+  
+        <input type="button" value="Issue Invoice" onclick="issueInvoice()">
+
+    </main>
+    
+</body>
+</html>
