@@ -115,3 +115,100 @@ footer p {
 .facebook-icon {
   background-color: #3b5998;
 }
+
+.menu-bar ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background-color: #333;
+}
+
+.menu-bar li {
+  float: left;
+}
+
+.menu-bar li a {
+  display: block;
+  color: white;
+  text-align: left;
+  padding: 14px 16px;
+  text-decoration: none;
+}
+
+.menu-bar li a:hover {
+  background-color: #ddd;
+  color: black;
+}
+
+.menu-bar li a.active {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.member-search, .member-details {
+  padding: 20px;
+}
+
+.member-details table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.member-details th {
+  background-color: #f2f2f2;
+  width: 30%; /* Adjust this value as needed */
+}
+
+.member-details td {
+  padding: 8px;
+  text-align: left;
+}
+
+th, td {
+  border: 1px solid #ddd;
+}
+.menu-bar ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background-color: #333;
+}
+
+.menu-bar li {
+  float: left;
+}
+
+.menu-bar li a {
+  display: block;
+  color: white;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+}
+
+.menu-bar li a:hover {
+  background-color: #ddd;
+  color: black;
+}
+
+.menu-bar li a.active {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.calendar-container {
+  padding: 20px;
+  text-align: center;
+}
+
+iframe {
+  max-width: 100%;
+  height: 600px;
+  border: none;
+}
+.day-label {
+  text-align: right; /* Right align the day labels */
+  padding-right: 10px; /* Add some space before the time input */
+}
