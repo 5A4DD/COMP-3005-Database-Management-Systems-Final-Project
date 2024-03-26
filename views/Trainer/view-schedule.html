@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>View Schedule - Momentum Fitness Center</title>
+  <link rel="stylesheet" href="../../styles/styles.css">
+  <style>
+    .menu-bar ul {
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background-color: #333;
+    }
+
+    .menu-bar li {
+      float: left;
+    }
+
+    .menu-bar li a {
+      display: block;
+      color: white;
+      text-align: center;
+      padding: 14px 16px;
+      text-decoration: none;
+    }
+
+    .menu-bar li a:hover {
+      background-color: #ddd;
+      color: black;
+    }
+
+    .menu-bar li a.active {
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    .calendar-container {
+      padding: 20px;
+      text-align: center;
+    }
+
+    iframe {
+      max-width: 100%;
+      height: 600px;
+      border: none;
+    }
+
+    /* Additional styles */
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Momentum Fitness Center</h1>
+    <div class="menu-bar">
+      <ul>
+        <li><a href="set-availability.html">Set Availability</a></li>
+        <li><a href="view-schedule.html" class="active">View Schedule</a></li>
+        <li><a href="view-member.html">View Member</a></li>
+      </ul>
+    </div>
+  </header>
+  <main>
+    <section class="calendar-container">
+      <h2>Trainer Schedule</h2>
+      <iframe src="https://calendar.google.com/calendar/embed?src=anas.abushaikhaa%40gmail.com&ctz=America%2FToronto" style="border: 0" width="800" height="600" frameborder="0" scrolling="no"></iframe>
+      <p>Use the calendar view to check your upcoming sessions and availability.</p>
+    </section>
+  </main>
+  <footer>
+    <p>© Momentum Fitness Center. All Rights Reserved.</p>
+  </footer>
+  <script src="../../client/scripts.js"></script>
+</body>
+</html>

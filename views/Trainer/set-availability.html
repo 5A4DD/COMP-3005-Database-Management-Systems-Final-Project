@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Set Availability - Momentum Fitness Center</title>
+  <link rel="stylesheet" href="../../styles/styles.css">
+  <style>
+    .day-label {
+      text-align: right; /* Right align the day labels */
+      padding-right: 10px; /* Add some space before the time input */
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Momentum Fitness Center</h1>
+    <nav>
+      <ul>
+        <li><a href="set-availability.html" class="active">Set Availability</a></li>
+        <li><a href="view-schedule.html">View Schedule</a></li>
+        <li><a href="view-member.html">View Member</a></li>
+      </ul>
+    </nav>
+  </header>
+  <main>
+    <section>
+      <h2>Set Your Availability</h2>
+      <form action="/submit-availability" method="post">
+        <table>
+          <thead>
+            <tr>
+              <th>Day</th>
+              <th>Time In</th>
+              <th>Time Out</th>
+              <th>All Day</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Repeat this block for each day of the week -->
+            <tr>
+                <td class="day-label">Monday</td>
+                <td><input type="time" name="monday_in"></td>
+                <td><input type="time" name="monday_out"></td>
+                <td><input type="checkbox" name="monday_allday" value="allday"> All Day</td>
+              </tr>
+              <tr>
+                <td class="day-label">Tuesday</td>
+                <td><input type="time" name="tuesday_in"></td>
+                <td><input type="time" name="tuesday_out"></td>
+                <td><input type="checkbox" name="tuesday_allday" value="allday"> All Day</td>
+              </tr>
+              <tr>
+                <td class="day-label">Wednesday</td>
+                <td><input type="time" name="wednesday_in"></td>
+                <td><input type="time" name="wednesday_out"></td>
+                <td><input type="checkbox" name="wednesday_allday" value="allday"> All Day</td>
+              </tr>
+              <tr>
+                <td class="day-label">Thursday</td>
+                <td><input type="time" name="thursday_in"></td>
+                <td><input type="time" name="thursday_out"></td>
+                <td><input type="checkbox" name="thursday_allday" value="allday"> All Day</td>
+              </tr>
+              <tr>
+                <td class="day-label">Friday</td>
+                <td><input type="time" name="friday_in"></td>
+                <td><input type="time" name="friday_out"></td>
+                <td><input type="checkbox" name="friday_allday" value="allday"> All Day</td>
+              </tr>
+              <tr>
+                <td class="day-label">Saturday</td>
+                <td><input type="time" name="saturday_in"></td>
+                <td><input type="time" name="saturday_out"></td>
+                <td><input type="checkbox" name="saturday_allday" value="allday"> All Day</td>
+              </tr>
+              <tr>
+                <td class="day-label">Sunday</td>
+                <td><input type="time" name="sunday_in"></td>
+                <td><input type="time" name="sunday_out"></td>
+                <td><input type="checkbox" name="sunday_allday" value="allday"> All Day</td>
+              </tr>
+            <!-- Repeat for the remaining days -->
+          </tbody>
+        </table>
+        <label for="comments">Comments:</label><br>
+        <textarea id="comments" name="comments" rows="4" cols="50"></textarea><br>
+        <input type="submit" value="Submit">
+      </form>
+    </section>
+  </main>
+  <footer>
+    <p>© Momentum Fitness Center. All Rights Reserved.</p>
+  </footer>
+  <script src="../../client/scripts.js"></script>
+</body>
+</html>
