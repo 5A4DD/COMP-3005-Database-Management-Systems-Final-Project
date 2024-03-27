@@ -98,19 +98,7 @@ app.post('/api/register', async (req, res) => {
     }
 });
 
-
-// API endpoint to get members
-app.get('/api/members', async (req, res) => {
-    try {
-        const dbRes = await pool.query('SELECT * FROM Member');
-        res.json(dbRes.rows);
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Internal server error' });
-    }
-});
-
-// Start the server
+// Start the server at the homepage
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}/index.html`);
 });
