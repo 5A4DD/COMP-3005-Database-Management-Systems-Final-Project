@@ -39,10 +39,10 @@ const port = 3000;
 
 // PostgreSQL pool setup
 const pool = new Pool({
-    user: 'ufqbm7pv6j7bi6',
+    user: 'u67bojptsr66u3',
     host: 'c8lcd8bq1mia7p.cluster-czrs8kj4isg7.us-east-1.rds.amazonaws.com',
-    database: 'd82chc2ib2bi2g',
-    password: 'p8d5705ddc8edc70639d612f2ac3ed0efe86b049e6da4acec02245ab524f50bf3',
+    database: 'd5e6c68ems7k6p',
+    password: 'pa2516a11e1396f55ab131cfce83602db44e99cd1889983b3e79cc1bcd9ec9651',
     port: 5432,
     ssl: {
         rejectUnauthorized: false,
@@ -112,9 +112,9 @@ app.post('/api/register', async (req, res) => {
         // Note: Assuming memberID is a SERIAL/AUTO INCREMENT, it should not be included in the insert statement
         const insertQuery = `
             INSERT INTO Member (
-                memberID, fName, lName, gender, emailAddr, phone, homeNum, streetName, postalCode, dateOfBirth
+                fName, lName, gender, emailAddr, phone, homeNum, streetName, postalCode, dateOfBirth
             ) VALUES (
-                4, $1, 'Doe', 'M', $2, '444-555-6666', '5678', 'Oak Ave', '67890', '1985-09-15'
+                $1, 'Doe', 'M', $2, '444-555-6666', '5678', 'Oak Ave', '67890', '1985-09-15'
             ) RETURNING *`;  // Use RETURNING * to get the inserted row
 
         // Array of values to insert
