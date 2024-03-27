@@ -11,9 +11,9 @@ document.addEventListener('DOMContentLoaded', function () {
             emailAddr: document.getElementById('email').value,
             //password: document.getElementById('password').value
         };
-        alert("Received name" + fName);
+        alert("Received name" + formData.fName);
 
-        
+
         fetch('/api/register', {
         method: 'POST',
         headers: {
