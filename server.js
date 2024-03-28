@@ -1,8 +1,14 @@
+//server.js
 
 const express = require('express');
 const { Pool } = require('pg');
 const app = express();
 const port = 3000;
+
+// Initialize dictionaries for storing login credentials
+const memberCredentials = {};
+const trainerCredentials = {};
+const adminCredentials = {};
 
 // PostgreSQL pool setup
 const pool = new Pool({
@@ -73,19 +79,32 @@ app.get('/view-schedule.html', (req, res) => {
 app.post('/api/register', async (req, res) => {
     try {
         // Extract data from the request body
-        const { fName, emailAddr } = req.body;
-        console.log(fName)
-        // Construct the query with placeholders for parameters
-        // Note: Assuming memberID is a SERIAL/AUTO INCREMENT, it should not be included in the insert statement
+        const {
+            firstName,
+            lastName,
+            gender,
+            email,
+            phone,
+            homeNum,
+            streetName,
+            postalCode,
+            dob,
+            password
+        } = req.body;
+
+        console.log("IN SERVER: saving into database: " + firstName)
+
+        memberCredentials[email] = password;
+        
         const insertQuery = `
             INSERT INTO Member (
                 fName, lName, gender, emailAddr, phone, homeNum, streetName, postalCode, dateOfBirth
             ) VALUES (
-                $1, 'Doe', 'M', $2, '444-555-6666', '5678', 'Oak Ave', '67890', '1985-09-15'
+                $1, $2, $3, $4, $5, $6, $7, $8, $9
             ) RETURNING *`;  // Use RETURNING * to get the inserted row
 
         // Array of values to insert
-        const values = [fName, emailAddr];
+        const values = [firstName, lastName, gender, email, phone, homeNum, streetName, postalCode, dob];
 
         // Execute the query with the values array
         const dbRes = await pool.query(insertQuery, values);

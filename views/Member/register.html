@@ -6,22 +6,61 @@
     <title>Register</title>
     <link rel="stylesheet" href="../../styles/styles.css">
   </head>
-  <body>
+  <body> 
     <header>
-      <h1>Join The Community. Begin Your Journey.</h1>
+      <h1>Momentum Fitness Center</h1>
+      <p class="tagline">Sweat, Smile, Repeat. Your Journey Starts Here!</p>
+      <nav>
+        <ul>
+          <li><a href="./about.html">About Us</a></li>
+          <li><a href="./contact.html">Contact</a></li>
+          <li><a href="./booking.html">Health Trainers Bookings</a></li>
+          <li><a href="./login.html">Register/Login</a></li>
+        </ul>
+      </nav>
     </header>
+
     <main>
-      <form id="registerForm">
-        
-        <label for="name">Name:</label><br>
-        <input type="text" id="name" name="name"><br>
-        <label for="email">Email address:</label><br>
-        <input type="email" id="email" name="email"><br>
-        <label for="password">Password:</label><br>
-        <input type="password" id="password" name="password"><br>
-        <input type="submit" value="JOIN NOW">
-      </form>
+      <div class="register-container">
+        <form id="registerForm">
+          
+          <label for="firstName">First Name:</label><br>
+          <input type="text" id="firstName" name="firstName"><br>
+          
+          <label for="lastName">Last Name:</label><br>
+          <input type="text" id="lastName" name="lastName"><br>
+          
+          <label for="gender">Gender using one letter (M/F/O):</label><br>
+          <input type="text" id="gender" name="gender"><br>
+          
+          <label for="email">Email address:</label><br>
+          <input type="email" id="email" name="email"><br>
+          
+          <label for="phone">Phone:</label><br>
+          <input type="text" id="phone" name="phone"><br>
+          
+          <label for="homeNum">Home Number:</label><br>
+          <input type="text" id="homeNum" name="homeNum"><br>
+          
+          <label for="streetName">Street Name:</label><br>
+          <input type="text" id="streetName" name="streetName"><br>
+          
+          <label for="postalCode">Postal Code:</label><br>
+          <input type="text" id="postalCode" name="postalCode"><br>
+          
+          <label for="dob">Date of Birth (Member must be 18+):</label><br>
+          <input type="date" id="dob" name="dob"><br>
+          
+          <label for="password">Password:</label><br>
+          <input type="password" id="password" name="password"><br>
+          
+          <input type="submit" value="JOIN NOW">
+        </form>
       <p>Already a member? <a href="./login.html">Click here</a> to log in.</p>
+      <div class="register-quote">
+        <p>Join our community of fitness enthusiasts and become a part of the Momentum Fitness Center family!</p>
+      </div>
+    </div>
     </main>
     <footer>
       <p>© Momentum Fitness Center. All Rights Reserved.</p>
@@ -30,3 +69,5 @@
     <script src="/functions/member_functions.js"></script>
   </body>
 </html>
+
+
