@@ -1,23 +1,23 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>View Schedule - Momentum Fitness Center</title>
-  <link rel="stylesheet" href="../../styles/styles.css">
+    <title>Class Schedule - Momentum Fitness Center</title>
+    <link rel="stylesheet" href="../../styles/styles.css">
 </head>
 <body>
-  <header>
-    <h1>Momentum Fitness Center</h1>
-    <div class="menu-bar">
-      <ul>
-        <li><a href="set-availability.html">Set Availability</a></li>
-        <li><a href="view-schedule.html" class="active">View Schedule</a></li>
-        <li><a href="view-member.html">View Member</a></li>
-      </ul>
-    </div>
-  </header>
-  <main>
-    <section class="calendar-container">
-      <h2>Your Current Bookings</h2>
+    <header>
+        <h1>Momentum Fitness Center</h1>        
+        <nav>
+            <ul>
+              <li><a href="booking.html">Bookings</a></li>
+              <li><a href="equipment-maintenance.html">Equipment Maintenance</a></li>
+              <li><a href="class-schedule.html">Class Schedules</a></li>
+              <li><a href="billings.html">Billings</a></li>
+            </ul>
+          </nav>
+    </header>
+    <main>
+        <h2>Bookings</h2>
         <table id="bookingTable">
             <thead>
                 <tr>
@@ -48,12 +48,10 @@
                 </tr>
             </tbody>
         </table>
-      <p>Use the calendar view to check your upcoming sessions and availability.</p>
-    </section>
-  </main>
-  <footer>
-    <p>© Momentum Fitness Center. All Rights Reserved.</p>
-  </footer>
-  <script src="../../client/scripts.js"></script>
+    </main>
+    <footer>
+        <p>© Momentum Fitness Center. All Rights Reserved.</p>
+      </footer>
+      <script src="../../functions/admin_functions.js"></script>
 </body>
 </html>

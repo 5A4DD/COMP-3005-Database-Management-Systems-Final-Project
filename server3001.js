@@ -3,7 +3,7 @@
 const express = require('express');
 const { Pool } = require('pg');
 const app = express();
-const port = 3000;
+const port = 3001;
 
 // Initialize dictionaries for storing login credentials
 // const memberCredentials = {};
@@ -56,10 +56,6 @@ app.get('/login.html', (req, res) => {
 
 app.get('/register.html', (req, res) => {
     res.sendFile('register.html', { root: './views/Member' });
-});
-
-app.get('/profile.html', (req, res) => {
-    res.sendFile('profile.html', { root: './views/Member' });
 });
 
 app.get('/set-availability.html', (req, res) => {
@@ -165,7 +161,6 @@ app.get('/get-equipment', async (req, res) => {
     try {
         // Query all equipment data from the database
         const getAllEquipmentQuery = 'SELECT * FROM Equipment';
-        
         const equipmentData = await pool.query(getAllEquipmentQuery);
 
         // Send the equipment data as JSON response
@@ -194,7 +189,7 @@ app.post('/submit-availability', async (req, res) => {
 
 // Start the server and other code
 
-// module.exports = pool;
+module.exports = pool;
 
 // Start the server at the homepage
 app.listen(port, () => {

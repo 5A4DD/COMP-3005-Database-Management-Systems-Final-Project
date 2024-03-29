@@ -11,29 +11,21 @@
             <ul>
               <li><a href="booking.html">Bookings</a></li>
               <li><a href="equipment-maintenance.html">Equipment Maintenance</a></li>
-              <li><a href="">Class Schedules</a></li>
+              <li><a href="class-schedule.html">Class Schedules</a></li>
               <li><a href="billings.html">Billings</a></li>
             </ul>
           </nav>
     </header>
 
     <main>
-        <h2>Equipment Maintenance Log</h2>
+        <h2>Submit maintenance Log</h2>
 
     <form id="maintenanceForm">
-        <label for="equipmentName">Equipment Name:</label>
-        <input type="text" id="equipmentName" name="equipmentName" required><br><br>
+        <label for="equipmentID">Equipment ID:</label>
+        <input type="text" id="equipmentID" name="equipmentID" required><br><br>
 
         <label for="maintenanceDate">Maintenance Date:</label>
         <input type="date" id="maintenanceDate" name="maintenanceDate" required><br><br>
-
-        <label for="location">Location:</label>
-            <select id="location" name="location" required>
-                <option value="">Select Room</option>
-                <option value="Room 1">Room 1</option>
-                <option value="Room 2">Room 2</option>
-                <option value="Room 3">Room 3</option>
-            </select><br><br>
 
         <label for="score">Maintenance Score:</label>
         <input type="number" id="score" name="score" required><br><br>
@@ -41,24 +33,25 @@
         <button id="logMaintenanceButton">Log Maintenance </button>
     </form>
     <br>
-    <h2>Maintenance Log</h2>
-    <table id="maintenanceTable">
-        <thead>
-            <tr>
-                <th>Equipment Name</th>
-                <th>Last Monitored</th>
-                <th>Location</th>
-                <th>Score</th>
-            </tr>
-        </thead>
-        <tbody id="maintenanceBody">
-            <!-- Maintenance log entries will be dynamically added here -->
-        </tbody>
-    </table>
+    <h2>Maintenance Logs    </h2>
+        <table id="equipmentTable">
+            <thead>
+                <tr>
+                    <th>Equipment ID</th>
+                    <th>Equipment Name</th>
+                    <th>Last Monitored</th>
+                    <th>Score</th>
+                    <th>Monitoring Admin</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Equipment data will be populated here -->
+            </tbody>
+        </table>
     </main>
     <footer>
         <p>© Momentum Fitness Center. All Rights Reserved.</p>
       </footer>
-      <script src="../../client/scripts.js"></script>
+      <script src="../../functions/admin_functions.js"></script>
 </body>
 </html>
