@@ -1,66 +1,50 @@
-const { Pool } = require('pg');
+document.addEventListener('DOMContentLoaded', function () {
+  const availabilityForm = document.getElementById('availabilityForm');
+  if (availabilityForm) {
+      availabilityForm.addEventListener('submit', function (e) {
+          e.preventDefault();
 
-const pool = require('../db');
+          const formData = {};
+          const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
-async function setTrainerAvailability(req) {
-  const trainerID = 1; // Assuming we're setting availability for trainerID 1
-  const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-  
-  for (let day of days) {
-    let startTime = req.body[day + '_in'];
-    console.log(day);
-    console.log(startTime);
-    let endTime = req.body[day + '_out'];
-    console.log(endTime);
-    console.log('-----------')
-    const allDay = req.body[day + '_allday'] === 'allday';
+          days.forEach(day => {
+              formData[day + '_in'] = document.querySelector(`input[name="${day}_in"]`).value;
+              formData[day + '_out'] = document.querySelector(`input[name="${day}_out"]`).value;
+              // Check the checkbox state and assign 'allday' if checked
+              formData[day + '_allday'] = document.querySelector(`input[name="${day}_allday"]`).checked ? 'allday' : '';
+          });
 
-    if (allDay) {
-      startTime = '00:00:00';
-      endTime = '23:59:59';
-    }
-
-    const availabilityCheckQuery = `
-      SELECT availabilityid FROM Availability 
-      WHERE day = $1 AND startTime = $2 AND endTime = $3
-    `;
-
-    const existingAvailability = await pool.query(availabilityCheckQuery, [day, startTime, endTime]);
-
-    if (existingAvailability.rowCount === 0) {
-      const insertAvailabilityQuery = `
-        INSERT INTO Availability (day, startTime, endTime) 
-        VALUES ($1, $2, $3) RETURNING availabilityid
-      `;
-
-      const insertResult = await pool.query(insertAvailabilityQuery, [day, startTime, endTime]);
-
-      if (insertResult.rows.length === 0) {
-        throw new Error(`No availabilityid returned for day ${day}`);
-      }
-
-      const newAvailabilityID = insertResult.rows[0].availabilityid;
-      console.log(`New Availability ID for day ${day}:`, newAvailabilityID);
-
-      const insertTrainerAvailabilityQuery = `
-        INSERT INTO TrainerAvailability (trainerID, availabilityid) 
-        VALUES ($1, $2)
-      `;
-
-      await pool.query(insertTrainerAvailabilityQuery, [trainerID, newAvailabilityID]);
-      console.log(`Trainer availability set for day ${day} with availabilityid: ${newAvailabilityID}`);
-    } else {
-      const existingAvailabilityID = existingAvailability.rows[0].availabilityid;
-      console.log(`Found existing availability for day ${day} with ID: ${existingAvailabilityID}`);
-      
-      const insertTrainerAvailabilityQuery = `
-        INSERT INTO TrainerAvailability (trainerID, availabilityid) 
-        VALUES ($1, $2) ON CONFLICT (trainerID, availabilityid) DO NOTHING
-      `;
-      
-      await pool.query(insertTrainerAvailabilityQuery, [trainerID, existingAvailabilityID]);
-    }
+          fetch('/submit-availability', {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(formData)
+          })
+          .then(response => {
+              if (!response.ok) {
+                  // If the HTTP response status is not in the 200-299 range
+                  // we still try to parse the JSON to get the error message
+                  // and then reject the promise with a custom error object.
+                  return response.json().then(errorData => {
+                      const error = new Error('Error while submitting availability');
+                      error.data = errorData;
+                      throw error;
+                  });
+              }
+              return response.json();
+          })
+          .then(data => {
+              alert('Availability updated successfully!');
+              // Additional actions upon success, such as redirecting to another page
+              // window.location.href = '/some-success-page.html';
+          })
+          .catch(error => {
+              console.error('Error during setting availability:', error);
+              // If the error has the 'data' property, it came from the server response.
+              // You can access the server provided error message like this:
+              alert('Failed to update availability: ' + (error.data ? error.data.message : 'Unknown error'));
+          });
+      });
   }
-}
-
-module.exports = { setTrainerAvailability };
+});

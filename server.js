@@ -16,7 +16,8 @@ const adminCredentials = {};
 // PostgreSQL pool setup
 const pool = require('./db');
 
-app.use(express.json()); // This is required to parse JSON request bodies
+app.use(express.json()); 
+app.use(express.urlencoded({ extended: true }));// This is required to parse JSON request bodies
 
 // Serve static files from 'views' folder
 app.use(express.static('views'));
@@ -175,21 +176,81 @@ app.get('/get-equipment', async (req, res) => {
         res.status(500).send('Internal server error');
     }
 });
+// Other middleware...
 
-
-
-const { setTrainerAvailability } = require('./functions/trainer_functions');
-// Your existing middleware and route setup
 app.post('/submit-availability', async (req, res) => {
+    // Assuming you have some way to determine the trainerID, possibly through authentication
+    const trainerID = 1; // Placeholder for the actual trainer ID
+
+    // Define days as an array to iterate over
+    const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+
     try {
-        await setTrainerAvailability(req);
-        res.send('Availability Set Successfully');
+        for (let day of days) {
+            let startTime = req.body[day + '_in'];
+            let endTime = req.body[day + '_out'];
+            const allDay = req.body[day + '_allday'];
+
+            // Skip the day if both startTime and endTime are empty and allDay is not checked
+            if (!startTime && !endTime && !allDay) {
+                continue;
+            }
+
+            if (allDay) {
+                startTime = '00:00:00';
+                endTime = '23:59:59';
+            }
+
+            // Capitalize the first letter of the day name
+            const capitalizedDay = day.charAt(0).toUpperCase() + day.slice(1);
+
+            const availabilityCheckQuery = `
+                SELECT availabilityid FROM Availability 
+                WHERE day = $1 AND startTime = $2 AND endTime = $3
+            `;
+
+            const existingAvailability = await pool.query(availabilityCheckQuery, [capitalizedDay, startTime, endTime]);
+
+            if (existingAvailability.rowCount === 0) {
+                const insertAvailabilityQuery = `
+                    INSERT INTO Availability (day, startTime, endTime) 
+                    VALUES ($1, $2, $3) RETURNING availabilityid
+                `;
+
+                const insertResult = await pool.query(insertAvailabilityQuery, [capitalizedDay, startTime, endTime]);
+
+                if (insertResult.rows.length === 0) {
+                    throw new Error(`No availabilityid returned for day ${capitalizedDay}`);
+                }
+
+                const newAvailabilityID = insertResult.rows[0].availabilityid;
+
+                const insertTrainerAvailabilityQuery = `
+                    INSERT INTO TrainerAvailability (trainerID, availabilityid) 
+                    VALUES ($1, $2)
+                `;
+
+                await pool.query(insertTrainerAvailabilityQuery, [trainerID, newAvailabilityID]);
+
+            } else {
+                const existingAvailabilityID = existingAvailability.rows[0].availabilityid;
+
+                const insertTrainerAvailabilityQuery = `
+                    INSERT INTO TrainerAvailability (trainerID, availabilityid) 
+                    VALUES ($1, $2) ON CONFLICT (trainerID, availabilityid) DO NOTHING
+                `;
+
+                await pool.query(insertTrainerAvailabilityQuery, [trainerID, existingAvailabilityID]);
+            }
+        }
+
+        res.status(200).json({ success: true, message: 'Availability updated successfully' });
     } catch (error) {
-        console.error('Error setting availability:', error.message);
-        console.error(error.stack); // This will give you the stack trace
-        res.status(500).send('Error setting availability. Check server logs for more details.');
+        console.error('Error setting availability:', error);
+        res.status(500).json({ success: false, message: 'Error setting availability. Check server logs for more details.' });
     }
 });
+
 
 
 // Start the server and other code
