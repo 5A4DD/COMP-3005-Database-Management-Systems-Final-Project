@@ -270,8 +270,7 @@ app.post('/search-member', async (req, res) => {
             // No profile found with the provided ID
             return res.status(404).json({ message: 'Profile not found.' });
         }
-        console.log(profileResult.rows[0])
-        console.log(profileResult.rows[0].profileid)
+
         // Send the found profile details as JSON
         res.json(profileResult.rows[0]);
     } catch (error) {
@@ -284,4 +283,4 @@ app.post('/search-member', async (req, res) => {
 // Start the server at the homepage
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}/index.html`);
-}); 
+});

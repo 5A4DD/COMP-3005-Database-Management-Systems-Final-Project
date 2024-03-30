@@ -1,6 +1,7 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
   <title>View Member - Momentum Fitness Center</title>
   <link rel="stylesheet" href="../../styles/styles.css">
 </head>
@@ -18,59 +19,57 @@
   <main>
     <div class="member-search">
       <h2>Member Lookup</h2>
-      <!-- Form for searching a member -->
-      <form action="/search-member" method="post">
+      <form id="member-search-form" action="javascript:void(0);">
         <input type="text" name="member_id" placeholder="Enter Member ID">
         <input type="submit" value="Search">
       </form>      
     </div>
     <div class="member-details">
       <h2>Member Details</h2>
-      <!-- Details displayed in a grid-like format -->
       <table>
         <tr>
           <th>Member ID</th>
-          <td>...</td>
+          <td id="member-id">...</td>
         </tr>
         <tr>
           <th>First Name</th>
-          <td>...</td>
+          <td id="first-name">...</td>
         </tr>
         <tr>
           <th>Last Name</th>
-          <td>...</td>
+          <td id="last-name">...</td>
         </tr>
         <tr>
           <th>Gender</th>
-          <td>...</td>
+          <td id="gender">...</td>
         </tr>
         <tr>
           <th>Email Address</th>
-          <td>...</td>
+          <td id="email-address">...</td>
         </tr>
         <tr>
           <th>Phone Number</th>
-          <td>...</td>
+          <td id="phone-number">...</td>
         </tr>
         <tr>
           <th>Address</th>
-          <td>...</td>
+          <td id="address">...</td>
         </tr>
         <tr>
           <th>Weight</th>
-          <td>...</td>
+          <td id="weight">...</td>
         </tr>
         <tr>
           <th>Blood Pressure</th>
-          <td>...</td>
+          <td id="blood-pressure">...</td>
         </tr>
         <tr>
           <th>Body Fat Percentage</th>
-          <td>...</td>
+          <td id="body-fat-percentage">...</td>
         </tr>
         <tr>
           <th>Status</th>
-          <td>...</td>
+          <td id="status">...</td>
         </tr>
       </table>
     </div>
