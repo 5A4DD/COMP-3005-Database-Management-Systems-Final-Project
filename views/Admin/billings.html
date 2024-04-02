@@ -27,7 +27,7 @@
           <input type="text" id="memberID" name="memberID" required><br><br>
 
 
-          <label for="date">Issuing Date:</label>
+          <label for="date">Billing Date:</label>
           <input type="date" id="date" name="date" required><br><br>
 
           <label for="itemName">Item Name:</label>
@@ -39,22 +39,24 @@
           <label for="description">Description:</label><br>
           <textarea id="description" name="description" rows="4" cols="50" required></textarea><br><br>
 
-          <button id="addToCartButton">Add to Cart</button><br><br>
+          <button id="issueInvoiceButton">Issue Invoice</button><br><br>
         </form>
 
-        <table id="cart">
+        <table id="Invoice Table">
           <thead>
               <tr>
-                  <th>Item Name</th>
-                  <th>Item Price</th>
-                  <th>Description</th>
+                  <th>Payment Id</th>
+                  <th>Type</th>
+                  <th>Date Issued</th>
+                  <th>Date Billed</th>
+                  <th>Amount</th>
+                  <th>Processing Admin</th>
+                  <th>Payee</th>        
               </tr>
-          </thead>
+          </thead>  
           <tbody id="cartBody"></tbody>
         </table><br>
-  
-        <button id="issueInvoiceButton">Issue Invoice</button>
-      
+
 
     </main>
     <footer>
