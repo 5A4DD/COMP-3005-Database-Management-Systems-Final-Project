@@ -30,6 +30,8 @@ document.addEventListener('DOMContentLoaded', function () {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
+
+
                     window.location.href = '/login.html'; // Redirect to login after registration
                 } else {
                     alert('Registration failed: ' + data.message);
@@ -59,7 +61,7 @@ document.getElementById('loginForm').addEventListener('submit', function(e) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            window.location.href = '/profile.html'; // Make sure the path is correct
+            window.location.href = '/profile.html';
         } else {
             alert('Login failed: ' + data.message);
         }
@@ -68,3 +70,6 @@ document.getElementById('loginForm').addEventListener('submit', function(e) {
         console.error('Error during login:', error);
     });
 });
+
+document.getElementById('profileName').textContent = data.member.fname;
+document.getElementById('memberId').textContent = data.member.memberid;

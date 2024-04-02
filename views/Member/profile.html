@@ -3,40 +3,45 @@
 
 <!DOCTYPE html>
 <html>
-<head>
-    <title>Profile</title>
-    <link rel="stylesheet" href="../../styles/styles.css">
-</head>
-<body>
-    <header>
-        <h1>Welcome, [User's First Name]!</h1>
-    </header>
-    <nav>
-        <ul>
-            <li><a href="/my-account.html">My Account</a></li>
-            <li><a href="/my-bookings.html">My Bookings</a></li>
-            <li><a href="/settings.html">Settings</a></li>
-            <li><a href="/logout">Logout</a></li>
-        </ul>
-    </nav>
-    <main>
-        <section class="profile-info">
-            <h2>Profile Information</h2>
-            <img src="/path-to-default-profile-pic.jpg" alt="Profile Picture">
-            <p>Name: [User's Full Name]</p>
-            <p>Email: [User's Email]</p>
-            <!-- Add more user details as needed -->
-        </section>
-        <section class="recent-activity">
-            <h2>Recent Activity</h2>
-            <!-- Add recent activity or bookings here -->
-            <p>Last Booking: [Details]</p>
-            <p>Last Login: [Date and Time]</p>
-            <!-- More activity details -->
-        </section>
-    </main>
-    <footer>
-        <p>© Momentum Fitness Center. All Rights Reserved.</p>
-    </footer>
-</body>
+    <head>
+        <title>Profile</title>
+        <link rel="stylesheet" href="../../styles/styles.css">
+    </head>
+
+    <body>
+        <header>
+            <h1>Welcome, [User's First Name]!</h1>
+            <p id="profileName">Name will be displayed here</p>
+            <p id="memberId">Member ID will be displayed here</p>
+
+            <nav>
+                <ul>
+                    <li><a href="/my-account.html">My Account</a></li>
+                    <li><a href="/my-bookings.html">My Bookings</a></li>
+                    <li><a href="/settings.html">Settings</a></li>
+                    <li><a href="/logout">Logout</a></li>
+                </ul>
+            </nav>
+        </header>
+
+        <main>
+            <section class="profile-info">
+                <h2>Profile Information</h2>
+                <!-- <img src="/path-to-default-profile-pic.jpg" alt="Profile Picture"> -->
+                <p>Name: [User's Full Name]</p>
+                <p>Email: [User's Email]</p>
+                <!-- Add more user details as needed -->
+            </section>
+            <section class="recent-activity">
+                <h2>Recent Activity</h2>
+                <!-- Add recent activity or bookings here -->
+                <p>Last Booking: [Details]</p>
+                <p>Last Login: [Date and Time]</p>
+                <!-- More activity details -->
+            </section>
+        </main>
+        <footer>
+            <p>© Momentum Fitness Center. All Rights Reserved.</p>
+        </footer>
+    </body>
 </html>

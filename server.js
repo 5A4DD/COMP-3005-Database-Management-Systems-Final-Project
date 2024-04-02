@@ -8,10 +8,13 @@ const port = 3000;
 // Initialize dictionaries for storing login credentials
 // const memberCredentials = {};
 const memberCredentials = {
-    'test123@gmail.com': '1234'
+    'test123@gmail.com': '1234',
+    'Q@Q': '1111'
 };
 const trainerCredentials = {};
 const adminCredentials = {};
+
+let profileid = 3;
 
 // PostgreSQL pool setup
 const pool = require('./db');
@@ -120,8 +123,20 @@ app.post('/api/login', async (req, res) => {
     const { email, password } = req.body;
     // Check the credentials against the stored dictionary
     if (memberCredentials[email] && memberCredentials[email] === password) {
-        // Correct credentials, login success
-        res.json({ success: true, message: 'Login successful.' });
+        // Query database for user's name
+        const query = 'SELECT fName FROM Member WHERE emailAddr = $1';
+        try {
+            const dbRes = await pool.query(query, [email]);
+            if (dbRes.rows.length > 0) {
+                // Send name in response
+                res.json({ success: true, message: 'Login successful.', name: dbRes.rows[0].fName });
+            } else {
+                res.status(401).json({ success: false, message: 'User not found.' });
+            }
+        } catch (err) {
+            console.error('Database error:', err);
+            res.status(500).json({ success: false, message: 'Internal server error' });
+        }
     } else {
         // Incorrect credentials, login fail
         res.status(401).json({ success: false, message: 'Invalid email or password.' });
