@@ -18,6 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(response => {
             if (response.ok) {
                 console.log('Maintenance log added successfully');
+                fetchEquipmentData();
                 // Optionally, update the UI or perform other actions on success
                 // For example, you can fetch and update the maintenance log table here
             } else {
@@ -29,8 +30,9 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('Error adding maintenance log:', error);
             // Handle network errors or other exceptions
         });
+    });
 
-        function fetchEquipmentData() {
+    function fetchEquipmentData() {
         fetch('/get-equipment')
         .then(response => response.json())
         .then(data => {
@@ -38,28 +40,26 @@ document.addEventListener('DOMContentLoaded', () => {
             equipmentTableBody.innerHTML = ''; // Clear existing table rows
 
             data.forEach(equipment => {
+                const dateOfLastMonitored = equipment.lastmonitored.split('T')[0];
+
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td>${equipment.equipmentID}</td>
-                    <td>${equipment.equipmentName}</td>
-                    <td>${equipment.lastMonitored}</td>
+                    <td>${equipment.equipmentid}</td>
+                    <td>${equipment.name}</td>
+                    <td>${equipment.location}</td>
+                    <td>${equipment.monitoringadmin}</td>
+                    <td>${dateOfLastMonitored}</td>
                     <td>${equipment.score}</td>
-                    <td>${equipment.monitoringAdmin}</td>
                 `;
                 equipmentTableBody.appendChild(row);
             });
         })
         .catch(error => {
             console.error('Error fetching equipment data:', error);
-            // Handle errors if needed
         });
     }
 
-    // Initial fetch of equipment data when the page loads
+    // Fetch equipment data when the page loads
     fetchEquipmentData();
 
-        
-    });
 });
-
-
