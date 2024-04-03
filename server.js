@@ -191,7 +191,46 @@ app.get('/get-equipment', async (req, res) => {
         res.status(500).send('Internal server error');
     }
 });
-// Other middleware...
+
+app.post('/issue-invoice', async (req, res) => {
+    try {
+        const { type, dateBilled, amount, processingAdmin, payee } = req.body;
+        const dateIssued = new Date().toISOString().slice(0, 10); // Get the current date in YYYY-MM-DD format
+
+        const insertQuery = `
+            INSERT INTO Payment (type, dateIssued, dateBilled, amount, processingAdmin, payee)
+            VALUES ($1, $2, $3, $4, $5, $6)
+        `;
+        
+        const values = [type, dateIssued, dateBilled, amount, processingAdmin, payee];
+
+        const result = await pool.query(insertQuery, values);
+
+        res.json({ success: true, payment: result.rows[0] });
+    } catch (error) {
+        console.error('Error issuing invoice:', error);
+        res.status(500).json({ success: false, message: 'Error issuing invoice. Check server logs for more details.' });
+    }
+});
+
+app.get('/get-payments', async (req, res) => {
+    try {
+        const query = `
+            SELECT p.paymentid, p.type, p.dateissued, p.datebilled, p.amount, p.processingadmin, 
+                   m.fName || ' ' || m.lName AS payee
+            FROM Payment p
+            INNER JOIN Profile pf ON p.payee = pf.profileid
+            INNER JOIN Member m ON pf.memberID = m.memberID;
+        `;
+        const result = await pool.query(query);
+        res.json(result.rows);
+    } catch (error) {
+        console.error('Error fetching payments:', error);
+        res.status(500).send('Internal server error');
+    }
+});
+
+
 
 app.post('/submit-availability', async (req, res) => {
     // Assuming you have some way to determine the trainerID, possibly through authentication
