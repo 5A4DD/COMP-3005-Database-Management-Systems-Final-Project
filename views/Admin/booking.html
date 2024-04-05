@@ -60,7 +60,23 @@
     </main>
     <footer>
         <p>© Momentum Fitness Center. All Rights Reserved.</p>
-      </footer>
-      <script src="../../functions/admin_functions.js"></script>    
+    </footer>
+    <script src="../../functions/admin_functions.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Retrieve admin name and ID from local storage
+            const adminName = localStorage.getItem('adminName');
+            const adminId = localStorage.getItem('adminId');
+        
+            // Update navbar or the designated areas with the admin's name and ID
+            const navBar = document.querySelector('nav ul');
+            if (navBar) {
+                navBar.insertAdjacentHTML('beforeend', `
+                    <li>Admin Name: ${adminName}</li>
+                    <li>Admin ID: ${adminId}</li>
+                `);
+            }
+        });
+    </script>
 </body>
 </html>

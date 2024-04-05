@@ -100,20 +100,30 @@
         <script src="../../functions/member_functions.js"></script>
         <script>
             document.addEventListener('DOMContentLoaded', function () {
-                // Retrieve the name and memberID from localStorage
-                console.log(localStorage.getItem('fname'));
-                console.log(localStorage.getItem('memberid'));
-                const userName = localStorage.getItem('fname');
-                const memberID = localStorage.getItem('memberid');
+                // Retrieve member name and ID from local storage
+                const memberName = localStorage.getItem('memberName');
+                const memberId = localStorage.getItem('memberId');
 
-                // Update the text content of the 'profileName' and 'memberId' elements
-                document.getElementById('profileName').textContent = "Name: " + userName;
-                document.getElementById('memberId').textContent = "Member ID: " + memberID;
+                // Update navbar or the designated areas with the member's name and ID
+                document.getElementById('profileName').textContent = "Name: " + memberName;
+                document.getElementById('memberId').textContent = "Member ID: " + memberId;
+
+    //                 // Create the list items for member name and ID
+    // const nameItem = document.createElement('li');
+    // nameItem.textContent = `Name: ${memberName}`;
+
+    // const idItem = document.createElement('li');
+    // idItem.textContent = `Member ID: ${memberId}`;
+
+    // // Insert the new list items into the navigation bar
+    // const navList = document.querySelector('header nav ul');
+    // navList.insertBefore(nameItem, navList.firstChild); // Inserts at the beginning
+    // navList.insertBefore(idItem, nameItem.nextSibling); // Inserts after the nameItem
 
                 // Optionally, you can also update the header greeting with the user's name
                 const headerGreeting = document.querySelector('header h1');
-                if (headerGreeting && userName) {
-                    headerGreeting.textContent = `Welcome, ${userName}!`;
+                if (headerGreeting && memberName) {
+                    headerGreeting.textContent = `Welcome, ${memberName}!`;
                 }
             });
         </script>

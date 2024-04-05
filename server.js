@@ -7,14 +7,16 @@ const port = 3000;
 
 // Initialize dictionaries for storing login credentials
 // const memberCredentials = {};
-const memberCredentials = {
+const memberCredentials = {     //only this one is dynamic (it can grow as more people register as members)
     'Q@Q': '1111',
 };
 const trainerCredentials = {
     'johndoe@email.com': '2222',
     'janesmith@email.com': '3333'
 };
-const adminCredentials = {};
+const adminCredentials = {
+    'charlieadmin@email.com': '6969'
+};
 
 let profileid = 3;
 
@@ -412,13 +414,36 @@ app.post('/api/trainerLogin', async (req, res) => {
     // Check the credentials against the trainerCredentials
     if (trainerCredentials[email] && trainerCredentials[email] === password) {
         // If credentials match, query the database for trainer details
-        const query = 'SELECT trainerid, fName FROM trainer WHERE emailaddr = $1';
+        const query = 'SELECT trainerid, fname FROM trainer WHERE emailaddr = $1';
         try {
             const dbRes = await pool.query(query, [email]);
             if (dbRes.rows.length > 0) {
                 res.json({ success: true, message: 'Login successful.', fname: dbRes.rows[0].fname, trainerid: dbRes.rows[0].trainerid });
             } else {
                 res.status(401).json({ success: false, message: 'Trainer not found.' });
+            }
+        } catch (err) {
+            console.error('Database error:', err);
+            res.status(500).json({ success: false, message: 'Internal server error' });
+        }
+    } else {
+        res.status(401).json({ success: false, message: 'Invalid email or password.' });
+    }
+});
+
+app.post('/api/adminLogin', async (req, res) => {
+    const { email, password } = req.body;
+
+    // Check the credentials against the adminCredentials (implement adminCredentials as per your logic)
+    if (adminCredentials[email] && adminCredentials[email] === password) {
+        // If credentials match, query the database for admin details
+        const query = 'SELECT adminid, fname FROM admin WHERE emailaddr = $1';
+        try {
+            const dbRes = await pool.query(query, [email]);
+            if (dbRes.rows.length > 0) {
+                res.json({ success: true, message: 'Login successful.', fname: dbRes.rows[0].fname, adminid: dbRes.rows[0].adminid });
+            } else {
+                res.status(401).json({ success: false, message: 'Admin not found.' });
             }
         } catch (err) {
             console.error('Database error:', err);

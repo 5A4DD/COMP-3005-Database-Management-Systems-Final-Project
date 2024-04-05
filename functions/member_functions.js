@@ -43,40 +43,40 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Event listener for the login form submission
-    const loginForm = document.getElementById('loginForm');
-    if (loginForm) {
-        loginForm.addEventListener('submit', function(e) {
-            e.preventDefault();
+    // const loginForm = document.getElementById('loginForm');
+    // if (loginForm) {
+    //     loginForm.addEventListener('submit', function(e) {
+    //         e.preventDefault();
 
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
+    //         const email = document.getElementById('email').value;
+    //         const password = document.getElementById('password').value;
 
-            fetch('/api/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ email, password }),
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log(data);
-                if (data.success) {
-                    console.log(data.fname);
-                    console.log(data.memberid);
-                    localStorage.setItem('fname', data.fname);
-                    localStorage.setItem('memberid', data.memberid);
+    //         fetch('/api/login', {
+    //             method: 'POST',
+    //             headers: {
+    //                 'Content-Type': 'application/json',
+    //             },
+    //             body: JSON.stringify({ email, password }),
+    //         })
+    //         .then(response => response.json())
+    //         .then(data => {
+    //             console.log(data);
+    //             if (data.success) {
+    //                 console.log(data.fname);
+    //                 console.log(data.memberid);
+    //                 localStorage.setItem('fname', data.fname);
+    //                 localStorage.setItem('memberid', data.memberid);
 
-                    window.location.href = '/profile.html';
-                } else {
-                    alert('Login failed: ' + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error during login:', error);
-            });
-        });
-    }
+    //                 window.location.href = '/profile.html';
+    //             } else {
+    //                 alert('Login failed: ' + data.message);
+    //             }
+    //         })
+    //         .catch(error => {
+    //             console.error('Error during login:', error);
+    //         });
+    //     });
+    // }
 
     // Handle create profile form submission
     const createProfileForm = document.getElementById('createProfileForm');
