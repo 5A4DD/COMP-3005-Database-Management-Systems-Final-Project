@@ -39,9 +39,83 @@
                 <p>Last Login: [Date and Time]</p>
                 <!-- More activity details -->
             </section>
+
+            <!-- UPDATING HEALTH METRICS -->
+            <h1>Profile information!</h1>
+            <form id="createProfileForm">       
+                <label for="weight">Weight:</label><br>
+                <input type="number" id="weight" name="weight"><br>
+                
+                <label for="bloodPressure">Blood Pressure:</label><br>
+                <input type="text" id="bloodPressure" name="bloodPressure"><br>
+                
+                <label for="bodyFat">Body Fat (%):</label><br>
+                <input type="number" id="bodyFat" name="bodyFat" step="0.01"><br>
+                
+                <input type="submit" value="Create/Update Profile">
+            </form>
+
+            <h1>Goals information!</h1>
+
+            <form id="updateFitnessGoalsForm">
+                <label for="targetWeight">Target Weight:</label><br>
+                <input type="number" id="targetWeight" name="targetWeight"><br>
+                
+                <label for="targetPace">Target Pace:</label><br>
+                <input type="text" id="targetPace" name="targetPace"><br>
+                
+                <label for="targetBodyFat">Target Body Fat (%):</label><br>
+                <input type="number" id="targetBodyFat" name="targetBodyFat" step="0.01"><br>
+                
+                <input type="submit" value="Update Fitness Goals">
+            </form>
+
+            <h1>Member information!</h1>
+            <form id="updateUserInfoForm">
+                <label for="updateEmail">Email:</label><br>
+                <input type="email" id="updateEmail" name="email"><br>
+                
+                <label for="updatePhone">Phone:</label><br>
+                <input type="text" id="updatePhone" name="phone"><br>
+                
+                <label for="updateHomeNum">Home Number:</label><br>
+                <input type="text" id="updateHomeNum" name="homeNum"><br>
+                
+                <label for="updateStreetName">Street Name:</label><br>
+                <input type="text" id="updateStreetName" name="streetName"><br>
+                
+                <label for="updatePostalCode">Postal Code:</label><br>
+                <input type="text" id="updatePostalCode" name="postalCode"><br>
+                
+                <input type="submit" value="Update Information">
+            </form>
+
         </main>
         <footer>
             <p>© Momentum Fitness Center. All Rights Reserved.</p>
         </footer>
+
+
+
+        <script src="../../functions/member_functions.js"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                // Retrieve the name and memberID from localStorage
+                console.log(localStorage.getItem('fname'));
+                console.log(localStorage.getItem('memberid'));
+                const userName = localStorage.getItem('fname');
+                const memberID = localStorage.getItem('memberid');
+
+                // Update the text content of the 'profileName' and 'memberId' elements
+                document.getElementById('profileName').textContent = "Name: " + userName;
+                document.getElementById('memberId').textContent = "Member ID: " + memberID;
+
+                // Optionally, you can also update the header greeting with the user's name
+                const headerGreeting = document.querySelector('header h1');
+                if (headerGreeting && userName) {
+                    headerGreeting.textContent = `Welcome, ${userName}!`;
+                }
+            });
+        </script>
     </body>
 </html>

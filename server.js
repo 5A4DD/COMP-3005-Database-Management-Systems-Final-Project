@@ -124,12 +124,16 @@ app.post('/api/login', async (req, res) => {
     // Check the credentials against the stored dictionary
     if (memberCredentials[email] && memberCredentials[email] === password) {
         // Query database for user's name
-        const query = 'SELECT fName FROM Member WHERE emailAddr = $1';
+        const query = 'SELECT memberid, fName FROM Member WHERE emailAddr = $1';
         try {
             const dbRes = await pool.query(query, [email]);
+
+            console.log("LOGIN SUCCESSFULL!");
+
             if (dbRes.rows.length > 0) {
                 // Send name in response
-                res.json({ success: true, message: 'Login successful.', name: dbRes.rows[0].fName });
+                console.log(dbRes.rows[0].fname + " " + dbRes.rows[0].memberid)
+                res.json({ success: true, message: 'Login successful.', fname: dbRes.rows[0].fname, memberid: dbRes.rows[0].memberid });
             } else {
                 res.status(401).json({ success: false, message: 'User not found.' });
             }
@@ -143,6 +147,73 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
+app.post('/api/createProfile', async (req, res) => {
+    const { memberId, weight, bloodPressure, bodyFat } = req.body;
+
+    try {
+        // Check if the profile already exists
+        const checkProfile = `SELECT * FROM profile WHERE memberid = $1;`;
+        const profileCheckRes = await pool.query(checkProfile, [memberId]);
+
+        if (profileCheckRes.rows.length > 0) {
+            // Profile exists, so update it
+            const updateProfileQuery = `
+                UPDATE profile
+                SET weight = $2, bloodpressure = $3, bodyfat = $4
+                WHERE memberid = $1
+                RETURNING *;`;
+            const updateValues = [memberId, weight, bloodPressure, bodyFat];
+            const updateRes = await pool.query(updateProfileQuery, updateValues);
+            res.json({ success: true, message: 'Profile updated successfully.', profile: updateRes.rows[0] });
+        } else {
+            // No profile exists, so create it
+            const insertProfileQuery = `
+                INSERT INTO profile (memberid, status, weight, bloodpressure, bodyfat)
+                VALUES ($1, 'Active', $2, $3, $4)
+                RETURNING profileid;`;
+            const insertValues = [memberId, weight, bloodPressure, bodyFat];
+            const insertRes = await pool.query(insertProfileQuery, insertValues);
+
+            const profileId = insertRes.rows[0].profileid;
+            // Update the Member entity with the new profile ID
+            const updateMemberQuery = `
+                UPDATE Member
+                SET profileid = $1
+                WHERE memberid = $2;`;
+            await pool.query(updateMemberQuery, [profileId, memberId]);
+            res.json({ success: true, message: 'Profile created successfully and member (FK to profileid) updated successfully.', profile: insertRes.rows[0] });
+        }
+    } catch (error) {
+        console.error('Error handling profile:', error);
+        res.status(500).json({ success: false, message: 'Error handling profile. Check server logs for more details.' });
+    }
+});
+
+app.post('/api/updateUserInfo/:memberId', async (req, res) => {
+    const { memberId } = req.params;
+    const { email, phone, homeNum, streetName, postalCode } = req.body;
+
+    try {
+        const updateQuery = `
+            UPDATE Member
+            SET emailAddr = $2, phone = $3, homeNum = $4, streetName = $5, postalCode = $6
+            WHERE memberId = $1
+            RETURNING *;`;
+
+        const updateValues = [memberId, email, phone, homeNum, streetName, postalCode];
+
+        const dbRes = await pool.query(updateQuery, updateValues);
+
+        if(dbRes.rows.length) {
+            res.json({ success: true, message: 'User info updated successfully.', user: dbRes.rows[0] });
+        } else {
+            res.json({ success: false, message: 'Failed to update user info.' });
+        }
+    } catch (err) {
+        console.error('Error updating user info:', err);
+        res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+});
 
 // Route to handle equipment maintenance log submission
 app.post('/submit-maintenance-log', async (req, res) => {
