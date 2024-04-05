@@ -51,7 +51,6 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     if (searchForm) {
         searchForm.addEventListener('submit', function (e) {
-            console.log("This got called");
             e.preventDefault();
     
             // Get the first name and last name values from the form
@@ -74,31 +73,25 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
                 return response.json();
             })
-            .then(dataArray => { // Expecting an array of member details
-                // Clear previous results
-                const memberDetailsContainer = document.querySelector('.member-details');
-                memberDetailsContainer.innerHTML = '';
-    
-                // Iterate through each set of member details and create a table
-                dataArray.forEach(data => {
-                    let memberTable = `
-                    <table>
-                        <tr><th>Member ID</th><td>${data.profileid || ''}</td></tr>
-                        <tr><th>First Name</th><td>${data.fname || ''}</td></tr>
-                        <tr><th>Last Name</th><td>${data.lname || ''}</td></tr>
-                        <tr><th>Gender</th><td>${data.gender || ''}</td></tr>
-                        <tr><th>Email Address</th><td>${data.emailaddr || ''}</td></tr>
-                        <tr><th>Phone Number</th><td>${data.phone || ''}</td></tr>
-                        <tr><th>Address</th><td>${data.address || ''}</td></tr>
-                        <tr><th>Weight</th><td>${data.weight ? data.weight + ' kg' : ''}</td></tr>
-                        <tr><th>Blood Pressure</th><td>${data.bloodpressure ? data.bloodpressure + ' mmHg' : ''}</td></tr>
-                        <tr><th>Body Fat Percentage</th><td>${data.bodyfat ? data.bodyfat + '%' : ''}</td></tr>
-                        <tr><th>Status</th><td>${data.status || ''}</td></tr>
-                    </table>
+            .then(data => {
+                // Populate the member details in the HTML
+                const memberDetailsContainer = document.querySelector('.member-details table');
+                if (memberDetailsContainer) {
+                    console.log(data);
+                    memberDetailsContainer.innerHTML = `
+                    <tr><th>Member ID</th><td>${data.profileid || ''}</td></tr>
+                    <tr><th>First Name</th><td>${data.fname || ''}</td></tr>
+                    <tr><th>Last Name</th><td>${data.lname || ''}</td></tr>
+                    <tr><th>Gender</th><td>${data.gender || ''}</td></tr>
+                    <tr><th>Email Address</th><td>${data.emailaddr || ''}</td></tr>
+                    <tr><th>Phone Number</th><td>${data.phone || ''}</td></tr>
+                    <tr><th>Address</th><td>${data.address || ''}</td></tr>
+                    <tr><th>Weight</th><td>${data.weight ? data.weight + ' kg' : ''}</td></tr>
+                    <tr><th>Blood Pressure</th><td>${data.bloodpressure ? data.bloodpressure + ' mmHg' : ''}</td></tr>
+                    <tr><th>Body Fat Percentage</th><td>${data.bodyfat ? data.bodyfat + '%' : ''}</td></tr>
+                    <tr><th>Status</th><td>${data.status || ''}</td></tr>
                     `;
-                    // Append the new table to the container
-                    memberDetailsContainer.insertAdjacentHTML('beforeend', memberTable);
-                });
+                }
             })
             .catch(error => {
                 console.error('Error during search:', error);
@@ -108,6 +101,8 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     
     
+    
+});
     
 //     if (searchForm) {
 //       searchForm.addEventListener('submit', function (e) {
@@ -158,4 +153,3 @@ document.addEventListener('DOMContentLoaded', function () {
 //           });
 //       });
 //   }
-});
