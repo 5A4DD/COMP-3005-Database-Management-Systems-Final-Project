@@ -376,37 +376,33 @@ app.post('/submit-availability', async (req, res) => {
 
 app.post('/search-member', async (req, res) => {
     const { first_name, last_name } = req.body;
-    console.log("Received search request for:", first_name, last_name); // Log out the input for debugging
 
     try {
-        // Perform a query to get all profile details matching the first and last names
+        // Perform a query to get the profile details by first name and last name
         const profileQuery = `
-            SELECT p.profileid, p.weight, p.bloodpressure, p.bodyfat, p.status,
-                   m.memberid, m.fname, m.lname, m.gender, m.emailaddr, m.phone, 
-                   CONCAT(m.homenum, ' ', m.streetname) AS address
+            SELECT p.profileID, p.weight, p.bloodPressure, p.bodyFat, p.status,
+                   m.memberID, m.fName, m.lName, m.gender, m.emailAddr, m.phone, 
+                   CONCAT(m.homeNum, ' ', m.streetName) AS address
             FROM Profile p
-            LEFT JOIN Member m ON p.profileid = m.memberid
-            WHERE m.fname = $1 AND m.lname = $2;
+            LEFT JOIN Member m ON p.profileID = m.memberID
+            WHERE m.fName = $1 AND m.lName = $2;
         `;
-
-        console.log("Executing query...");
         const profileResult = await pool.query(profileQuery, [first_name, last_name]);
-        console.log("Query executed, result count:", profileResult.rows.length); // Log out the result count
 
         if (profileResult.rows.length === 0) {
-            // No profiles found with the provided first name and last name
-            console.log("No profiles found for the provided names.");
-            return res.status(404).json({ message: 'No profiles found.' });
+            // No profile found with the provided first name and last name
+            return res.status(404).json({ message: 'Profile not found.' });
         }
-
-        // Send all the found profile details as an array in JSON
-        console.log("Sending profile data:", profileResult.rows);
+        console.log(profileResult.rows)
+        // Send the found profile details as JSON
         res.json(profileResult.rows);
     } catch (error) {
         console.error('Error in /search-member:', error);
         res.status(500).json({ message: 'Internal server error.' });
     }
 });
+
+
 
 
 app.post('/api/trainerLogin', async (req, res) => {
