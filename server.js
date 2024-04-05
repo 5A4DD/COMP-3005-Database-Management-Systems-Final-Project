@@ -303,7 +303,7 @@ app.get('/get-payments', async (req, res) => {
 
 app.post('/submit-availability', async (req, res) => {
     // Assuming you have some way to determine the trainerID, possibly through authentication
-    const trainerID = 1; // Placeholder for the actual trainer ID
+    const trainerID = req.body.trainerId; // Placeholder for the actual trainer ID
 
     // Define days as an array to iterate over
     const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
@@ -375,7 +375,7 @@ app.post('/submit-availability', async (req, res) => {
 });
 
 app.post('/search-member', async (req, res) => {
-    const { first_name, last_name } = req.body;
+    const { first_name, last_name, trainer_id} = req.body;
 
     try {
         // Perform a query to get the profile details by first name and last name
@@ -426,6 +426,23 @@ app.post('/api/trainerLogin', async (req, res) => {
         res.status(401).json({ success: false, message: 'Invalid email or password.' });
     }
 });
+
+app.post('/api/get-bookings-for-instructor', async (req, res) => {
+    const { trainerId } = req.body;
+
+    try {
+        const query = `
+            SELECT * FROM Bookings
+            WHERE instructor = $1;
+        `;
+        const result = await pool.query(query, [trainerId]);
+        res.json(result.rows);
+    } catch (error) {
+        console.error('Error fetching bookings for instructor:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
 
 app.post('/api/adminLogin', async (req, res) => {
     const { email, password } = req.body;

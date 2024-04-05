@@ -5,10 +5,11 @@ document.addEventListener('DOMContentLoaded', function () {
     if (availabilityForm) {
         availabilityForm.addEventListener('submit', function (e) {
             e.preventDefault();
-  
+            
             const formData = {};
             const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-  
+            const trainerid = localStorage.getItem('trainerId');
+            formData['trainerId'] = trainerid;
             days.forEach(day => {
                 formData[day + '_in'] = document.querySelector(`input[name="${day}_in"]`).value;
                 formData[day + '_out'] = document.querySelector(`input[name="${day}_out"]`).value;
@@ -58,6 +59,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const lastNameInput = document.querySelector('input[name="last_name"]');
             const firstName = firstNameInput ? firstNameInput.value : '';
             const lastName = lastNameInput ? lastNameInput.value : '';
+            const trainerid = localStorage.getItem('trainerId');
     
             // Send the first name and last name to the server to retrieve member details
             fetch('/search-member', {
@@ -65,7 +67,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ first_name: firstName, last_name: lastName })
+                body: JSON.stringify({ first_name: firstName, last_name: lastName, trainer_id: trainerid })
             })
             .then(response => {
                 if (!response.ok) {
@@ -153,3 +155,32 @@ document.addEventListener('DOMContentLoaded', function () {
 //           });
 //       });
 //   }
+
+document.addEventListener('DOMContentLoaded', function () {
+    const trainerId = localStorage.getItem('trainerId');
+
+    fetch('/api/get-bookings-for-instructor', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ trainerId: trainerId })
+    })
+    .then(response => response.json())
+    .then(data => {
+        const bookingTable = document.getElementById('bookingTable');
+        const tbody = bookingTable.getElementsByTagName('tbody')[0];
+        tbody.innerHTML = ''; // Clear existing rows
+
+        data.forEach(booking => {
+            const row = tbody.insertRow();
+            row.insertCell(0).textContent = booking.classType;
+            row.insertCell(1).textContent = booking.date;
+            row.insertCell(2).textContent = booking.time;
+            row.insertCell(3).textContent = booking.duration;
+            row.insertCell(4).textContent = booking.room;
+            row.insertCell(5).textContent = booking.instructors; // Adjust field names based on your database
+        });
+    })
+    .catch(error => console.error('Failed to load bookings:', error));
+});
