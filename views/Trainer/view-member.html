@@ -1,6 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>View Member - Momentum Fitness Center</title>
   <link rel="stylesheet" href="../../styles/styles.css">
 </head>
@@ -19,60 +21,18 @@
     <div class="member-search">
       <h2>Member Lookup</h2>
       <!-- Form for searching a member -->
-      <form action="/search-member" method="post">
-        <input type="text" name="member_name" placeholder="Enter Member Name">
+      <form id="searchForm"> <!-- Ensure the form has an id for easy selection -->
+        <input type="text" name="first_name" placeholder="Enter First Name">
+        <input type="text" name="last_name" placeholder="Enter Last Name">
         <input type="submit" value="Search">
-      </form>         
+      </form>                     
     </div>
     <div class="member-details">
       <h2>Member Details</h2>
-      <!-- Details displayed in a grid-like format -->
-      <table>
-        <tr>
-          <th>Member ID</th>
-          <td>...</td>
-        </tr>
-        <tr>
-          <th>First Name</th>
-          <td>...</td>
-        </tr>
-        <tr>
-          <th>Last Name</th>
-          <td>...</td>
-        </tr>
-        <tr>
-          <th>Gender</th>
-          <td>...</td>
-        </tr>
-        <tr>
-          <th>Email Address</th>
-          <td>...</td>
-        </tr>
-        <tr>
-          <th>Phone Number</th>
-          <td>...</td>
-        </tr>
-        <tr>
-          <th>Address</th>
-          <td>...</td>
-        </tr>
-        <tr>
-          <th>Weight</th>
-          <td>...</td>
-        </tr>
-        <tr>
-          <th>Blood Pressure</th>
-          <td>...</td>
-        </tr>
-        <tr>
-          <th>Body Fat Percentage</th>
-          <td>...</td>
-        </tr>
-        <tr>
-          <th>Status</th>
-          <td>...</td>
-        </tr>
-      </table>
+      <!-- Container for dynamically inserted member details tables -->
+      <div id="memberDetailsContainer">
+        <!-- Dynamic member tables will be inserted here by JavaScript -->
+      </div>
     </div>
   </main>
   <footer>

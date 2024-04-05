@@ -55,5 +55,23 @@
     <p>© Momentum Fitness Center. All Rights Reserved.</p>
   </footer>
   <script src="../../client/scripts.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Retrieve trainer name and ID from local storage
+        const trainerName = localStorage.getItem('trainerName');
+        const trainerId = localStorage.getItem('trainerId');
+    
+        // Update navbar with trainer's name and ID
+        const navBar = document.querySelector('.menu-bar');
+        if (navBar) {
+            navBar.insertAdjacentHTML('beforeend', `
+                <ul>
+                    <li>Trainer Name: ${trainerName}</li>
+                    <li>Trainer ID: ${trainerId}</li>
+                </ul>
+            `);
+        }
+    });
+    </script>
 </body>
 </html>

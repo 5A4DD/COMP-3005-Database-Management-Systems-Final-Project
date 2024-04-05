@@ -24,7 +24,10 @@
         <input type="email" id="email" name="email"><br>
         <label for="password">Password:</label><br>
         <input type="password" id="password" name="password"><br>
-        <input type="submit" value="LOGIN">
+        <input type="submit" value="Member Login">
+        <button type="button" onclick="loginAsTrainer()">Trainer Login</button>
+        <!-- <input type="submit" value="Trainer Login"> -->
+        <input type="submit" value="Admin Login">
       </form>
       <p>Don't have an account? <a href="./register.html">Click here</a> to register.</p>
     </main>
@@ -34,5 +37,6 @@
 
     
     <script src="/functions/member_functions.js"></script>
+    <script src="/functions/trainer_and_admin_login_functions.js"></script>
   </body>
 </html>

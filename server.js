@@ -8,10 +8,12 @@ const port = 3000;
 // Initialize dictionaries for storing login credentials
 // const memberCredentials = {};
 const memberCredentials = {
-    'test123@gmail.com': '1234',
-    'Q@Q': '1111'
+    'Q@Q': '1111',
 };
-const trainerCredentials = {};
+const trainerCredentials = {
+    'johndoe@email.com': '2222',
+    'janesmith@email.com': '3333'
+};
 const adminCredentials = {};
 
 let profileid = 3;
@@ -78,6 +80,7 @@ app.get('/view-schedule.html', (req, res) => {
     res.sendFile('view-schedule.html', { root: './views/Trainer' });
 });
 
+//MEMBER REGISTER
 app.post('/api/register', async (req, res) => {
     try {
         // Extract data from the request body
@@ -98,27 +101,41 @@ app.post('/api/register', async (req, res) => {
 
         memberCredentials[email] = password;
         
-        const insertQuery = `
+        const insertMemberQuery = `
             INSERT INTO Member (
                 fName, lName, gender, emailAddr, phone, homeNum, streetName, postalCode, dateOfBirth
             ) VALUES (
                 $1, $2, $3, $4, $5, $6, $7, $8, $9
-            ) RETURNING *`;  // Use RETURNING * to get the inserted row
+            ) RETURNING memberID`;  // Use RETURNING * to get the inserted row
 
-        // Array of values to insert
-        const values = [firstName, lastName, gender, email, phone, homeNum, streetName, postalCode, dob];
+        const memberValues = [firstName, lastName, gender, email, phone, homeNum, streetName, postalCode, dob];
+        const memberResult = await pool.query(insertMemberQuery, memberValues);
+        const memberId = memberResult.rows[0].memberid;
 
-        // Execute the query with the values array
-        const dbRes = await pool.query(insertQuery, values);
+        // Then, create a blank profile for this member
+        const insertProfileQuery = `
+            INSERT INTO Profile (memberID, status, weight, bloodPressure, bodyFat)
+            VALUES ($1, 'Active', NULL, NULL, NULL)
+            RETURNING profileID;`; // This assumes you want to set the status to 'Active' by default
+
+        const profileResult = await pool.query(insertProfileQuery, [memberId]);
+        const profileId = profileResult.rows[0].profileid;
+
+        // Lastly, update the Member table with the new profileID
+        // This step seems unnecessary if the profileID and memberID are meant to be the same, 
+        // but let's proceed as per your requirement
+        const updateMemberQuery = `UPDATE Member SET profileID = $1 WHERE memberID = $2;`;
+        await pool.query(updateMemberQuery, [profileId, memberId]);
 
         // Send the response with the inserted member
-        res.json({ success: true, member: dbRes.rows[0] });
+        res.json({ success: true, message: 'Member and profile created successfully.', member: memberResult.rows[0], profile: profileResult.rows[0] });
     } catch (err) {
-        console.error('Registration error:', err);
+        console.error('Error during registration:', err);
         res.status(500).json({ success: false, message: 'Internal server error' });
     }
 });
 
+//MEMBER LOGIN
 app.post('/api/login', async (req, res) => {
     const { email, password } = req.body;
     // Check the credentials against the stored dictionary
@@ -147,48 +164,27 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
-app.post('/api/createProfile', async (req, res) => {
+//MEMBER UPDATE PROFILE HEALTH STATS
+app.post('/api/updateProfile', async (req, res) => {
     const { memberId, weight, bloodPressure, bodyFat } = req.body;
 
     try {
-        // Check if the profile already exists
-        const checkProfile = `SELECT * FROM profile WHERE memberid = $1;`;
-        const profileCheckRes = await pool.query(checkProfile, [memberId]);
-
-        if (profileCheckRes.rows.length > 0) {
-            // Profile exists, so update it
-            const updateProfileQuery = `
-                UPDATE profile
-                SET weight = $2, bloodpressure = $3, bodyfat = $4
-                WHERE memberid = $1
-                RETURNING *;`;
-            const updateValues = [memberId, weight, bloodPressure, bodyFat];
-            const updateRes = await pool.query(updateProfileQuery, updateValues);
-            res.json({ success: true, message: 'Profile updated successfully.', profile: updateRes.rows[0] });
-        } else {
-            // No profile exists, so create it
-            const insertProfileQuery = `
-                INSERT INTO profile (memberid, status, weight, bloodpressure, bodyfat)
-                VALUES ($1, 'Active', $2, $3, $4)
-                RETURNING profileid;`;
-            const insertValues = [memberId, weight, bloodPressure, bodyFat];
-            const insertRes = await pool.query(insertProfileQuery, insertValues);
-
-            const profileId = insertRes.rows[0].profileid;
-            // Update the Member entity with the new profile ID
-            const updateMemberQuery = `
-                UPDATE Member
-                SET profileid = $1
-                WHERE memberid = $2;`;
-            await pool.query(updateMemberQuery, [profileId, memberId]);
-            res.json({ success: true, message: 'Profile created successfully and member (FK to profileid) updated successfully.', profile: insertRes.rows[0] });
-        }
+        // Profile exists, so update it
+        const updateProfileQuery = `
+            UPDATE profile
+            SET weight = $2, bloodpressure = $3, bodyfat = $4
+            WHERE memberid = $1
+            RETURNING *;`;
+        const updateValues = [memberId, weight, bloodPressure, bodyFat];
+        const updateRes = await pool.query(updateProfileQuery, updateValues);
+        res.json({ success: true, message: 'Profile updated successfully.', profile: updateRes.rows[0] });
     } catch (error) {
         console.error('Error handling profile:', error);
         res.status(500).json({ success: false, message: 'Error handling profile. Check server logs for more details.' });
     }
 });
 
+//MEMBER UPDATE INITIAL REGISTER INFO
 app.post('/api/updateUserInfo/:memberId', async (req, res) => {
     const { memberId } = req.params;
     const { email, phone, homeNum, streetName, postalCode } = req.body;
@@ -377,33 +373,90 @@ app.post('/submit-availability', async (req, res) => {
 });
 
 app.post('/search-member', async (req, res) => {
-    const { member_id } = req.body; // Assuming profileID is the same as memberID
+    const { first_name, last_name } = req.body;
+    console.log("Received search request for:", first_name, last_name); // Log out the input for debugging
 
     try {
-        // Perform a query to get the profile details by profileID (assumed to be the same as memberID)
+        // Perform a query to get all profile details matching the first and last names
         const profileQuery = `
-            SELECT p.profileID, p.weight, p.bloodPressure, p.bodyFat, p.status,
-                   m.memberID, m.fName, m.lName, m.gender, m.emailAddr, m.phone, 
-                   CONCAT(m.homeNum, ' ', m.streetName) AS address
+            SELECT p.profileid, p.weight, p.bloodpressure, p.bodyfat, p.status,
+                   m.memberid, m.fname, m.lname, m.gender, m.emailaddr, m.phone, 
+                   CONCAT(m.homenum, ' ', m.streetname) AS address
             FROM Profile p
-            LEFT JOIN Member m ON p.profileID = m.memberID
-            WHERE p.profileID = $1;
+            LEFT JOIN Member m ON p.profileid = m.memberid
+            WHERE m.fname = $1 AND m.lname = $2;
         `;
-        const profileResult = await pool.query(profileQuery, [member_id]);
+
+        console.log("Executing query...");
+        const profileResult = await pool.query(profileQuery, [first_name, last_name]);
+        console.log("Query executed, result count:", profileResult.rows.length); // Log out the result count
 
         if (profileResult.rows.length === 0) {
-            // No profile found with the provided ID
-            return res.status(404).json({ message: 'Profile not found.' });
+            // No profiles found with the provided first name and last name
+            console.log("No profiles found for the provided names.");
+            return res.status(404).json({ message: 'No profiles found.' });
         }
-        console.log(profileResult.rows[0])
-        console.log(profileResult.rows[0].profileid)
-        // Send the found profile details as JSON
-        res.json(profileResult.rows[0]);
+
+        // Send all the found profile details as an array in JSON
+        console.log("Sending profile data:", profileResult.rows);
+        res.json(profileResult.rows);
     } catch (error) {
         console.error('Error in /search-member:', error);
         res.status(500).json({ message: 'Internal server error.' });
     }
 });
+
+
+app.post('/api/trainerLogin', async (req, res) => {
+    const { email, password } = req.body;
+    // Check the credentials against the trainerCredentials
+    if (trainerCredentials[email] && trainerCredentials[email] === password) {
+        // If credentials match, query the database for trainer details
+        const query = 'SELECT trainerid, fName FROM trainer WHERE emailaddr = $1';
+        try {
+            const dbRes = await pool.query(query, [email]);
+            if (dbRes.rows.length > 0) {
+                res.json({ success: true, message: 'Login successful.', fname: dbRes.rows[0].fname, trainerid: dbRes.rows[0].trainerid });
+            } else {
+                res.status(401).json({ success: false, message: 'Trainer not found.' });
+            }
+        } catch (err) {
+            console.error('Database error:', err);
+            res.status(500).json({ success: false, message: 'Internal server error' });
+        }
+    } else {
+        res.status(401).json({ success: false, message: 'Invalid email or password.' });
+    }
+});
+
+// app.post('/search-member', async (req, res) => {
+//     const { member_id } = req.body; // Assuming profileID is the same as memberID
+
+//     try {
+//         // Perform a query to get the profile details by profileID (assumed to be the same as memberID)
+//         const profileQuery = `
+//             SELECT p.profileID, p.weight, p.bloodPressure, p.bodyFat, p.status,
+//                    m.memberID, m.fName, m.lName, m.gender, m.emailAddr, m.phone, 
+//                    CONCAT(m.homeNum, ' ', m.streetName) AS address
+//             FROM Profile p
+//             LEFT JOIN Member m ON p.profileID = m.memberID
+//             WHERE p.profileID = $1;
+//         `;
+//         const profileResult = await pool.query(profileQuery, [member_id]);
+
+//         if (profileResult.rows.length === 0) {
+//             // No profile found with the provided ID
+//             return res.status(404).json({ message: 'Profile not found.' });
+//         }
+//         console.log(profileResult.rows[0])
+//         console.log(profileResult.rows[0].profileid)
+//         // Send the found profile details as JSON
+//         res.json(profileResult.rows[0]);
+//     } catch (error) {
+//         console.error('Error in /search-member:', error);
+//         res.status(500).json({ message: 'Internal server error.' });
+//     }
+// });
 
 
 // Start the server at the homepage

@@ -50,52 +50,112 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
     if (searchForm) {
-      searchForm.addEventListener('submit', function (e) {
-          e.preventDefault();
-  
-          // Get the member ID value from the form
-          const memberIDInput = document.querySelector('input[name="member_id"]');
-          const memberID = memberIDInput ? memberIDInput.value : '';
-  
-          // Send the member ID to the server to retrieve member details
-          fetch('/search-member', {
-              method: 'POST',
-              headers: {
-                  'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({ member_id: memberID })
-          })
-          .then(response => {
-              if (!response.ok) {
-                  throw new Error('Network response was not ok.');
-              }
-              return response.json();
-          })
-          .then(data => {
-              // Populate the member details in the HTML
-              const memberDetailsContainer = document.querySelector('.member-details table');
-              if (memberDetailsContainer) {
-                  console.log(data);
-                  memberDetailsContainer.innerHTML = `
-                  <tr><th>Member ID</th><td>${data.profileid || ''}</td></tr>
-                  <tr><th>First Name</th><td>${data.fname || ''}</td></tr>
-                  <tr><th>Last Name</th><td>${data.lname || ''}</td></tr>
-                  <tr><th>Gender</th><td>${data.gender || ''}</td></tr>
-                  <tr><th>Email Address</th><td>${data.emailaddr || ''}</td></tr>
-                  <tr><th>Phone Number</th><td>${data.phone || ''}</td></tr>
-                  <tr><th>Address</th><td>${data.address || ''}</td></tr>
-                  <tr><th>Weight</th><td>${data.weight ? data.weight + ' kg' : ''}</td></tr>
-                  <tr><th>Blood Pressure</th><td>${data.bloodpressure ? data.bloodpressure + ' mmHg' : ''}</td></tr>
-                  <tr><th>Body Fat Percentage</th><td>${data.bodyfat ? data.bodyfat + '%' : ''}</td></tr>
-                  <tr><th>Status</th><td>${data.status || ''}</td></tr>
-                  
-                  `;
-              }
-          })
-          .catch(error => {
-              console.error('Error during search:', error);
-              alert('Failed to retrieve member details. Please try again.');
-          });
-      });
-  }
-  });
+        searchForm.addEventListener('submit', function (e) {
+            console.log("This got called");
+            e.preventDefault();
+    
+            // Get the first name and last name values from the form
+            const firstNameInput = document.querySelector('input[name="first_name"]');
+            const lastNameInput = document.querySelector('input[name="last_name"]');
+            const firstName = firstNameInput ? firstNameInput.value : '';
+            const lastName = lastNameInput ? lastNameInput.value : '';
+    
+            // Send the first name and last name to the server to retrieve member details
+            fetch('/search-member', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ first_name: firstName, last_name: lastName })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok.');
+                }
+                return response.json();
+            })
+            .then(dataArray => { // Expecting an array of member details
+                // Clear previous results
+                const memberDetailsContainer = document.querySelector('.member-details');
+                memberDetailsContainer.innerHTML = '';
+    
+                // Iterate through each set of member details and create a table
+                dataArray.forEach(data => {
+                    let memberTable = `
+                    <table>
+                        <tr><th>Member ID</th><td>${data.profileid || ''}</td></tr>
+                        <tr><th>First Name</th><td>${data.fname || ''}</td></tr>
+                        <tr><th>Last Name</th><td>${data.lname || ''}</td></tr>
+                        <tr><th>Gender</th><td>${data.gender || ''}</td></tr>
+                        <tr><th>Email Address</th><td>${data.emailaddr || ''}</td></tr>
+                        <tr><th>Phone Number</th><td>${data.phone || ''}</td></tr>
+                        <tr><th>Address</th><td>${data.address || ''}</td></tr>
+                        <tr><th>Weight</th><td>${data.weight ? data.weight + ' kg' : ''}</td></tr>
+                        <tr><th>Blood Pressure</th><td>${data.bloodpressure ? data.bloodpressure + ' mmHg' : ''}</td></tr>
+                        <tr><th>Body Fat Percentage</th><td>${data.bodyfat ? data.bodyfat + '%' : ''}</td></tr>
+                        <tr><th>Status</th><td>${data.status || ''}</td></tr>
+                    </table>
+                    `;
+                    // Append the new table to the container
+                    memberDetailsContainer.insertAdjacentHTML('beforeend', memberTable);
+                });
+            })
+            .catch(error => {
+                console.error('Error during search:', error);
+                alert('Failed to retrieve member details. Please try again.');
+            });
+        });
+    }
+    
+    
+    
+//     if (searchForm) {
+//       searchForm.addEventListener('submit', function (e) {
+//           e.preventDefault();
+
+//           // Get the member ID value from the form
+//           const memberIDInput = document.querySelector('input[name="member_id"]');
+//           const memberID = memberIDInput ? memberIDInput.value : '';
+
+//           // Send the member ID to the server to retrieve member details
+//           fetch('/search-member', {
+//               method: 'POST',
+//               headers: {
+//                   'Content-Type': 'application/json'
+//               },
+//               body: JSON.stringify({ member_id: memberID })
+//           })
+//           .then(response => {
+//               if (!response.ok) {
+//                   throw new Error('Network response was not ok.');
+//               }
+//               return response.json();
+//           })
+//           .then(data => {
+//               // Populate the member details in the HTML
+//               const memberDetailsContainer = document.querySelector('.member-details table');
+//               if (memberDetailsContainer) {
+//                   console.log(data);
+//                   memberDetailsContainer.innerHTML = `
+//                   <tr><th>Member ID</th><td>${data.profileid || ''}</td></tr>
+//                   <tr><th>First Name</th><td>${data.fname || ''}</td></tr>
+//                   <tr><th>Last Name</th><td>${data.lname || ''}</td></tr>
+//                   <tr><th>Gender</th><td>${data.gender || ''}</td></tr>
+//                   <tr><th>Email Address</th><td>${data.emailaddr || ''}</td></tr>
+//                   <tr><th>Phone Number</th><td>${data.phone || ''}</td></tr>
+//                   <tr><th>Address</th><td>${data.address || ''}</td></tr>
+//                   <tr><th>Weight</th><td>${data.weight ? data.weight + ' kg' : ''}</td></tr>
+//                   <tr><th>Blood Pressure</th><td>${data.bloodpressure ? data.bloodpressure + ' mmHg' : ''}</td></tr>
+//                   <tr><th>Body Fat Percentage</th><td>${data.bodyfat ? data.bodyfat + '%' : ''}</td></tr>
+//                   <tr><th>Status</th><td>${data.status || ''}</td></tr>
+
+//                   `;
+//               }
+//           })
+//           .catch(error => {
+//               console.error('Error during search:', error);
+//               alert('Failed to retrieve member details. Please try again.');
+//           });
+//       });
+//   }
+});

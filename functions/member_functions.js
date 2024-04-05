@@ -93,7 +93,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 bodyFat: document.getElementById('bodyFat').value,
             };
 
-            fetch('/api/createProfile', {
+            fetch('/api/updateProfile', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
