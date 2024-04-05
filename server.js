@@ -70,6 +70,14 @@ app.get('/profile.html', (req, res) => {
     res.sendFile('profile.html', { root: './views/Member' });
 });
 
+app.get('/dashboard.html', (req, res) => {
+    res.sendFile('dashboard.html', { root: './views/Member' });
+});
+
+app.get('/member-schedule.html', (req, res) => {
+    res.sendFile('member-schedule.html', { root: './views/Member' });
+});
+
 app.get('/set-availability.html', (req, res) => {
     res.sendFile('set-availability.html', { root: './views/Trainer' });
 });
@@ -81,6 +89,7 @@ app.get('/view-member.html', (req, res) => {
 app.get('/view-schedule.html', (req, res) => {
     res.sendFile('view-schedule.html', { root: './views/Trainer' });
 });
+
 
 //MEMBER REGISTER
 app.post('/api/register', async (req, res) => {
@@ -186,6 +195,25 @@ app.post('/api/updateProfile', async (req, res) => {
     }
 });
 
+app.post('/api/get-member-bookings', async (req, res) => {
+    const { memberId } = req.body;
+
+    try {
+        const bookingsQuery = `
+            SELECT b.*, m.memberID
+            FROM Booking b
+            INNER JOIN EventsMember em ON b.bookingID = em.bookingID
+            WHERE em.memberID = $1;
+        `;
+        const bookings = await pool.query(bookingsQuery, [memberId]);
+        res.json(bookings.rows);
+    } catch (error) {
+        console.error('Error fetching member bookings:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+
 //MEMBER UPDATE INITIAL REGISTER INFO
 app.post('/api/updateUserInfo/:memberId', async (req, res) => {
     const { memberId } = req.params;
@@ -244,6 +272,40 @@ app.post('/submit-maintenance-log', async (req, res) => {
         res.status(500).send('Internal server error');
     }
 });
+
+app.get('/api/get-bookings-events', async (req, res) => {
+    try {
+        const query = `
+            SELECT b.*, em.scheduleMID 
+            FROM Booking b
+            INNER JOIN EventsMember em ON b.bookingID = em.bookingID;
+        `;
+        const result = await pool.query(query);
+        res.json(result.rows);
+    } catch (error) {
+        console.error('Error fetching booking and events data:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+
+
+
+app.get('/api/get-bookings-events', async (req, res) => {
+    try {
+        const query = `
+            SELECT b.*, em.scheduleMID 
+            FROM Booking b
+            INNER JOIN EventsMember em ON b.bookingID = em.bookingID;
+        `;
+        const result = await pool.query(query);
+        res.json(result.rows);
+    } catch (error) {
+        console.error('Error fetching booking and events data:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
 
 // Route to fetch all equipment data
 app.get('/get-equipment', async (req, res) => {
@@ -432,7 +494,7 @@ app.post('/api/get-bookings-for-instructor', async (req, res) => {
 
     try {
         const query = `
-            SELECT * FROM Bookings
+            SELECT * FROM Booking
             WHERE instructor = $1;
         `;
         const result = await pool.query(query, [trainerId]);
@@ -442,6 +504,7 @@ app.post('/api/get-bookings-for-instructor', async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 });
+
 
 
 app.post('/api/adminLogin', async (req, res) => {

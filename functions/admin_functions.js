@@ -141,3 +141,40 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 });
+
+document.addEventListener('DOMContentLoaded', () => {
+
+    function fetchAndDisplayBookings() {
+        fetch('/api/get-bookings-events')
+            .then(response => response.json())
+            .then(bookings => {
+                const tableBody = document.getElementById('bookingTable').querySelector('tbody');
+                tableBody.innerHTML = '';
+    
+                bookings.forEach((booking) => {
+                    const date = booking.date.split('T')[0];
+
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td><input type="checkbox" name="selectedBooking" value="${booking.bookingID}"></td>
+                        <td>${booking.type}</td>
+                        <td>${date}</td>
+                        <td>${booking.time}</td>
+                        <td>${booking.duration}</td>
+                        <td>${booking.room}</td>
+                        <td>${booking.instructor}</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching booking data:', error);
+            });
+    }
+
+    fetchAndDisplayBookings();  
+});
+
+
+
+
