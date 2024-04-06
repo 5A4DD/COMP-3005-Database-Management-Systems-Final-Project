@@ -83,7 +83,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const bookingTable = document.getElementById('bookingTable');
     console.log(bookingTable);
     if (bookingTable) {
-        const memberId = 1;
+        const memberId = localStorage.getItem('memberid');
         console.log(memberId);
         fetch('/api/get-member-bookings', {
             method: 'POST',
@@ -166,42 +166,6 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
     }
-
-    // const bookingTable = document.getElementById('bookingTable');
-    // console.log(bookingTable);
-    // if (bookingTable) {
-    //     const memberId = 1;
-    //     console.log(memberId);
-    //     fetch('/api/get-member-bookings', {
-    //         method: 'POST',
-    //         headers: {
-    //             'Content-Type': 'application/json',
-    //         },
-    //         body: JSON.stringify({ member_Id: memberId }),
-    //     })
-    //     .then(response => {
-    //         if (!response.ok) {
-    //             throw new Error(`HTTP error! status: ${response.status}`);
-    //         }
-    //         return response.json();
-    //     })
-    //     .then(bookings => {
-    //         const bookingTableBody = document.querySelector('#bookingTable tbody');
-    //         bookingTableBody.innerHTML = bookings.map(booking => `
-    //             <tr>
-    //                 <td>${booking.type}</td>
-    //                 <td>${booking.date}</td>
-    //                 <td>${booking.time}</td>
-    //                 <td>${booking.duration}</td>
-    //                 <td>${booking.room}</td>
-    //                 <td>${booking.instructor}</td>
-    //             </tr>
-    //         `).join('');
-    //     })
-    //     .catch(error => {
-    //         console.error('Error fetching member bookings:', error);
-    //     });
-    // }
 
     //updating member info in profile.html
     // const updateForm = document.getElementById('updateUserInfoForm');

@@ -577,36 +577,6 @@ app.post('/api/adminLogin', async (req, res) => {
     }
 });
 
-// app.post('/search-member', async (req, res) => {
-//     const { member_id } = req.body; // Assuming profileID is the same as memberID
-
-//     try {
-//         // Perform a query to get the profile details by profileID (assumed to be the same as memberID)
-//         const profileQuery = `
-//             SELECT p.profileID, p.weight, p.bloodPressure, p.bodyFat, p.status,
-//                    m.memberID, m.fName, m.lName, m.gender, m.emailAddr, m.phone, 
-//                    CONCAT(m.homeNum, ' ', m.streetName) AS address
-//             FROM Profile p
-//             LEFT JOIN Member m ON p.profileID = m.memberID
-//             WHERE p.profileID = $1;
-//         `;
-//         const profileResult = await pool.query(profileQuery, [member_id]);
-
-//         if (profileResult.rows.length === 0) {
-//             // No profile found with the provided ID
-//             return res.status(404).json({ message: 'Profile not found.' });
-//         }
-//         console.log(profileResult.rows[0])
-//         console.log(profileResult.rows[0].profileid)
-//         // Send the found profile details as JSON
-//         res.json(profileResult.rows[0]);
-//     } catch (error) {
-//         console.error('Error in /search-member:', error);
-//         res.status(500).json({ message: 'Internal server error.' });
-//     }
-// });
-
-
 // Start the server at the homepage
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}/index.html`);
