@@ -163,6 +163,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <td>${booking.duration}</td>
                         <td>${booking.room}</td>
                         <td>${booking.instructor}</td>
+                        <td>${booking.memberid}</td>
                     `;
                     tableBody.appendChild(row);
                 });
@@ -174,7 +175,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     fetchAndDisplayBookings();  
 });
-
 
 
 

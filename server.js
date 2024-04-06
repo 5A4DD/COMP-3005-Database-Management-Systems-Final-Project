@@ -258,9 +258,9 @@ app.post('/submit-maintenance-log', async (req, res) => {
 app.get('/api/get-bookings-events', async (req, res) => {
     try {
         const query = `
-            SELECT b.*, em.scheduleMID 
-            FROM Booking b
-            INNER JOIN EventsMember em ON b.bookingID = em.bookingID;
+        SELECT b.*
+               FROM Booking b
+               WHERE status = 'Pending';
         `;
         const result = await pool.query(query);
         res.json(result.rows);
@@ -334,9 +334,11 @@ app.post('/api/request-booking', async (req, res) => {
 app.get('/api/get-bookings-events', async (req, res) => {
     try {
         const query = `
-            SELECT b.*, em.scheduleMID 
+            SELECT b.*, ms.memberid
             FROM Booking b
-            INNER JOIN EventsMember em ON b.bookingID = em.bookingID;
+            INNER JOIN eventsmember em ON b.bookingid = em.bookingid
+            INNER JOIN memberschedule ms ON em.schedulemid = ms.schedulemid
+            WHERE status = 'Pending';
         `;
         const result = await pool.query(query);
         res.json(result.rows);
