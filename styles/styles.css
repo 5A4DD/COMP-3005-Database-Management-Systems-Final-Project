@@ -212,4 +212,10 @@ iframe {
   text-align: right; /* Right align the day labels */
   padding-right: 10px; /* Add some space before the time input */
 }
+.calendar-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
 

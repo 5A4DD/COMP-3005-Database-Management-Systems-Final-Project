@@ -9,6 +9,7 @@ const port = 3000;
 // const memberCredentials = {};
 const memberCredentials = {     //only this one is dynamic (it can grow as more people register as members)
     'Q@Q': '1111',
+    'alicewong@email.com': '2222'
 };
 const trainerCredentials = {
     'johndoe@email.com': '2222',
@@ -268,6 +269,65 @@ app.get('/api/get-bookings-events', async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 });
+
+app.post('/api/get-member-bookings', async (req, res) => {
+    const { member_Id } = req.body;
+    console.log(req.body)
+    console.log('In member get bookings');
+    try {
+        const bookingsQuery = `
+            SELECT b.*
+            FROM booking b
+            INNER JOIN eventsmember em ON b.bookingid = em.bookingid
+            INNER JOIN memberschedule ms ON em.schedulemid = ms.schedulemid
+            WHERE ms.memberid = $1;
+        `;
+        const bookings = await pool.query(bookingsQuery, [member_Id]);
+        console.log(bookings)
+        res.json(bookings.rows);
+    } catch (error) {
+        console.error('Error fetching member bookings:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+app.post('/api/request-booking', async (req, res) => {
+    // Destructure the body to get the required fields
+    let { classType, date, time, duration, instructor, room } = req.body;
+
+    try {
+        // Ensure the date is in the format YYYY-MM-DD for PostgreSQL
+        date = new Date(date).toISOString().split('T')[0]; // Converts the date to YYYY-MM-DD format
+        
+        // Ensure the time is in the format HH:MM:SS for PostgreSQL
+        time = time + ':00'; // Appends seconds to the time
+        
+        // Construct the SQL query to insert the new booking
+        const insertBookingQuery = `
+            INSERT INTO booking (type, date, time, duration, instructor, room, status)
+            VALUES ($1, $2, $3, $4, $5, $6, 'Pending') 
+            RETURNING bookingid; 
+        `;
+
+        // Execute the query with the formatted date and time
+        const result = await pool.query(insertBookingQuery, [classType, date, time, duration, instructor, room]);
+
+        // If the insert was successful, send back a success response
+        if (result.rows.length > 0) {
+            res.json({ success: true, message: 'Booking request submitted successfully.', bookingId: result.rows[0].bookingid });
+        } else {
+            // If no rows were inserted, send an error response
+            res.status(400).json({ success: false, message: 'Booking request could not be processed.' });
+        }
+    } catch (error) {
+        // Log the error and send a 500 Internal Server Error response
+        console.error('Error submitting booking request:', error);
+        res.status(500).json({ success: false, message: 'Internal server error while processing booking request.' });
+    }
+});
+
+
+
 
 
 
