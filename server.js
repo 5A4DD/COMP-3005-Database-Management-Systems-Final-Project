@@ -258,9 +258,11 @@ app.post('/submit-maintenance-log', async (req, res) => {
 app.get('/api/get-bookings-events', async (req, res) => {
     try {
         const query = `
-            SELECT b.*, em.scheduleMID 
-            FROM Booking b
-            INNER JOIN EventsMember em ON b.bookingID = em.bookingID;
+        SELECT b.type, b.date, b.time, b.duration, b.room, 
+               t.fname || ' ' || t.lname AS trainer
+        FROM Booking b
+        INNER JOIN Trainer t ON b.instructor = t.trainerid
+        WHERE status = 'Pending';
         `;
         const result = await pool.query(query);
         res.json(result.rows);

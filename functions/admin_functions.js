@@ -153,6 +153,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
                 bookings.forEach((booking) => {
                     const date = booking.date.split('T')[0];
+                    console.log(booking.trainer)
 
                     const row = document.createElement('tr');
                     row.innerHTML = `
@@ -162,7 +163,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <td>${booking.time}</td>
                         <td>${booking.duration}</td>
                         <td>${booking.room}</td>
-                        <td>${booking.instructor}</td>
+                        <td>${booking.trainer}</td>
                     `;
                     tableBody.appendChild(row);
                 });
@@ -174,7 +175,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     fetchAndDisplayBookings();  
 });
-
 
 
 
