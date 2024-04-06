@@ -7,6 +7,8 @@
 <body>
   <header>
     <h1>Momentum Fitness Center</h1>
+    <p id="profileName">Name will be displayed here</p>
+    <p id="memberId">Member ID will be displayed here</p>
   </header>
   <main>
     <section class="calendar-container">
@@ -62,5 +64,16 @@
     <p>© Momentum Fitness Center. All Rights Reserved.</p>
   </footer>
   <script src="../../functions/member_functions.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Retrieve member name and ID from local storage
+        const memberName = localStorage.getItem('memberName');
+        const memberId = localStorage.getItem('memberId');
+
+        // Update navbar or the designated areas with the member's name and ID
+        document.getElementById('profileName').textContent = "Name: " + memberName;
+        document.getElementById('memberId').textContent = "Member ID: " + memberId;
+      });
+  </script>
 </body>
 </html>
