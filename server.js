@@ -195,25 +195,6 @@ app.post('/api/updateProfile', async (req, res) => {
     }
 });
 
-app.post('/api/get-member-bookings', async (req, res) => {
-    const { memberId } = req.body;
-
-    try {
-        const bookingsQuery = `
-            SELECT b.*, m.memberID
-            FROM Booking b
-            INNER JOIN EventsMember em ON b.bookingID = em.bookingID
-            WHERE em.memberID = $1;
-        `;
-        const bookings = await pool.query(bookingsQuery, [memberId]);
-        res.json(bookings.rows);
-    } catch (error) {
-        console.error('Error fetching member bookings:', error);
-        res.status(500).json({ message: 'Internal server error' });
-    }
-});
-
-
 //MEMBER UPDATE INITIAL REGISTER INFO
 app.post('/api/updateUserInfo/:memberId', async (req, res) => {
     const { memberId } = req.params;
@@ -287,7 +268,6 @@ app.get('/api/get-bookings-events', async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 });
-
 
 
 
@@ -489,21 +469,26 @@ app.post('/api/trainerLogin', async (req, res) => {
     }
 });
 
-app.post('/api/get-bookings-for-instructor', async (req, res) => {
-    const { trainerId } = req.body;
+
+// Trainer Get booking
+// Endpoint to get bookings by trainerId
+app.get('/api/get-trainer-bookings', async (req, res) => {
+    const { trainerId } = req.query;  // Assuming trainerId is passed as a query parameter
 
     try {
         const query = `
-            SELECT * FROM Booking
+            SELECT type, date, time, duration, room, instructor FROM Booking
             WHERE instructor = $1;
         `;
         const result = await pool.query(query, [trainerId]);
         res.json(result.rows);
     } catch (error) {
-        console.error('Error fetching bookings for instructor:', error);
+        console.error('Error fetching trainer bookings:', error);
         res.status(500).json({ message: 'Internal server error' });
     }
 });
+
+
 
 
 

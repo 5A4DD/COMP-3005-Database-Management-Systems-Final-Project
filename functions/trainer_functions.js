@@ -102,6 +102,37 @@ document.addEventListener('DOMContentLoaded', function () {
         });
         
     }
+    function fetchAndDisplayBookings() {
+        const trainerId = localStorage.getItem('trainerId');
+
+        fetch(`/api/get-trainer-bookings?trainerId=${trainerId}`)
+            .then(response => response.json())
+            .then(bookings => {
+                const tableBody = document.getElementById('bookingTable').querySelector('tbody');
+                tableBody.innerHTML = '';
+
+                bookings.forEach((booking) => {
+                    const date = booking.date.split('T')[0];
+                    
+                    const row = document.createElement('tr');
+                    
+                    row.innerHTML = `
+                        <td>${booking.type}</td>
+                        <td>${date}</td>
+                        <td>${booking.time}</td>
+                        <td>${booking.duration}</td>
+                        <td>${booking.room}</td>
+                        <td>${booking.instructor}</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching booking data:', error);
+            });
+    }
+
+    fetchAndDisplayBookings();
 });
     
 //     if (searchForm) {
@@ -153,48 +184,6 @@ document.addEventListener('DOMContentLoaded', function () {
 //           });
 //       });
 //   }
-
-document.addEventListener('DOMContentLoaded', () => {
-    const trainerId = localStorage.getItem('trainerId');
-    console.log('Trainer ID:', trainerId);
-
-    if (trainerId && document.location.pathname.includes('view-schedule.html')) {
-        console.log('Fetching bookings for trainer:', trainerId);
-        fetch('/api/get-bookings-for-instructor', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ trainerId: trainerId })
-        })
-        .then(response => {
-            console.log('Response received');
-            return response.json();
-        })
-        .then(bookings => {
-            console.log('Bookings:', bookings);
-            const bookingTable = document.getElementById('bookingTable');
-            if (!bookingTable) {
-                console.error('Booking table not found');
-                return;
-            }
-
-            const tbody = bookingTable.getElementsByTagName('tbody')[0];
-            tbody.innerHTML = ''; // Clear existing rows
-
-            bookings.forEach(booking => {
-                const row = tbody.insertRow();
-                row.insertCell(0).textContent = booking.type;
-                row.insertCell(1).textContent = booking.date;
-                row.insertCell(2).textContent = booking.time;
-                row.insertCell(3).textContent = booking.duration;
-                row.insertCell(4).textContent = booking.room;
-                row.insertCell(5).textContent = booking.instructor; // Adjust if necessary
-            });
-        })
-        .catch(error => console.error('Failed to load bookings:', error));
-    }
-});
 
 
 
