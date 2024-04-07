@@ -50,7 +50,8 @@ document.addEventListener('DOMContentLoaded', function () {
         createProfileForm.addEventListener('submit', function (e) {
             e.preventDefault();
 
-            const memberId = localStorage.getItem('memberid');
+            const memberId = localStorage.getItem('memberId');
+
             console.log("IN PROFILE MEMBERID" + memberId);
             const formData = {
                 memberId: memberId,
@@ -83,8 +84,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const bookingTable = document.getElementById('bookingTable');
     console.log(bookingTable);
     if (bookingTable) {
-        const memberId = localStorage.getItem('memberid');
-        console.log(memberId);
+        const memberId = localStorage.getItem('memberId');
+        console.log("IN BOOKING TABLE------------" + memberId);
         fetch('/api/get-member-bookings', {
             method: 'POST',
             headers: {
@@ -130,8 +131,10 @@ document.addEventListener('DOMContentLoaded', function () {
     if (bookingRequestForm) {
         bookingRequestForm.addEventListener('submit', function(e) {
             e.preventDefault(); // Prevents the default form submission
-
+            const memberId = localStorage.getItem('memberId');
+            console.log(memberId);
             const bookingData = {
+                memberId: memberId,
                 classType: document.getElementById('classType').value,
                 date: document.getElementById('date').value,
                 time: document.getElementById('time').value,
@@ -167,7 +170,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    //updating member info in profile.html
+    // //updating member info in profile.html
     // const updateForm = document.getElementById('updateUserInfoForm');
     // updateForm.addEventListener('submit', function(e) {
     //     e.preventDefault();
@@ -181,7 +184,7 @@ document.addEventListener('DOMContentLoaded', function () {
     //     };
 
     //     // Assuming you store memberId or a similar identifier in localStorage or another client-side storage
-    //     const memberId = localStorage.getItem('memberid');
+    //     const memberId = localStorage.getItem('memberId');
 
     //     fetch(`/api/updateUserInfo/${memberId}`, {
     //         method: 'POST',
@@ -214,7 +217,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 targetBodyFat: document.getElementById('targetBodyFat').value,
             };
 
-            const memberId = localStorage.getItem('memberid'); // Assuming member ID is stored in localStorage
+            const memberId = localStorage.getItem('memberId'); // Assuming member ID is stored in localStorage
 
             fetch(`/api/updateFitnessGoals/${memberId}`, {
                 method: 'POST',

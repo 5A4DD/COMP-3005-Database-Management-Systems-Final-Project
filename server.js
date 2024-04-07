@@ -9,7 +9,8 @@ const port = 3000;
 // const memberCredentials = {};
 const memberCredentials = {     //only this one is dynamic (it can grow as more people register as members)
     'Q@Q': '1111',
-    'alicewong@email.com': '2222'
+    'alicewong@email.com': '2222',
+    'bobjohnson@email.com': '3333'
 };
 const trainerCredentials = {
     'johndoe@email.com': '2222',
@@ -258,9 +259,10 @@ app.post('/submit-maintenance-log', async (req, res) => {
 app.get('/api/get-bookings-events', async (req, res) => {
     try {
         const query = `
-        SELECT b.*
-               FROM Booking b
-               WHERE status = 'Pending';
+        SELECT *
+        FROM Booking b
+        INNER JOIN requestbooking rb ON b.bookingid = rb.bookingid
+        WHERE status = 'Pending';;
         `;
         const result = await pool.query(query);
         res.json(result.rows);
@@ -269,6 +271,43 @@ app.get('/api/get-bookings-events', async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 });
+
+app.post('/api/handle-bookings', async (req, res) => {
+    const { bookings } = req.body; // This contains an array of { bookingId, memberId }
+    const action = req.query.action; // 'accept' or 'deny'
+
+    try {
+        // Start a transaction
+        await pool.query('BEGIN');
+
+        for (const { bookingId, memberId } of bookings) {
+            // Delete the requestbooking entry
+            await pool.query('DELETE FROM requestbooking WHERE bookingid = $1 AND memberid = $2', [bookingId, memberId]);
+
+            if (action === 'accept') {
+                // Get schedulemid from memberschedule that maps to memberid
+                const scheduleQuery = 'SELECT schedulemid FROM memberschedule WHERE memberid = $1';
+                const scheduleRes = await pool.query(scheduleQuery, [memberId]);
+                const schedulemid = scheduleRes.rows[0].schedulemid;
+
+                // Add the new entry of bookingid to schedulemid into eventsmember
+                const eventsMemberInsertQuery = 'INSERT INTO eventsmember (bookingid, schedulemid) VALUES ($1, $2)';
+                await pool.query(eventsMemberInsertQuery, [bookingId, schedulemid]);
+            }
+        }
+
+        // Commit the transaction
+        await pool.query('COMMIT');
+
+        res.json({ success: true, message: `Bookings have been ${action === 'accept' ? 'accepted' : 'denied'}.` });
+    } catch (error) {
+        // Rollback in case of an error
+        await pool.query('ROLLBACK');
+        console.error(`Error handling bookings: ${error}`);
+        res.status(500).json({ success: false, message: 'Internal server error while processing bookings.' });
+    }
+});
+
 
 app.post('/api/get-member-bookings', async (req, res) => {
     const { member_Id } = req.body;
@@ -292,39 +331,81 @@ app.post('/api/get-member-bookings', async (req, res) => {
 });
 
 app.post('/api/request-booking', async (req, res) => {
-    // Destructure the body to get the required fields
-    let { classType, date, time, duration, instructor, room } = req.body;
+    const { memberId, classType, date, time, duration, instructor, room } = req.body;
 
     try {
-        // Ensure the date is in the format YYYY-MM-DD for PostgreSQL
-        date = new Date(date).toISOString().split('T')[0]; // Converts the date to YYYY-MM-DD format
-        
-        // Ensure the time is in the format HH:MM:SS for PostgreSQL
-        time = time + ':00'; // Appends seconds to the time
-        
-        // Construct the SQL query to insert the new booking
-        const insertBookingQuery = `
-            INSERT INTO booking (type, date, time, duration, instructor, room, status)
-            VALUES ($1, $2, $3, $4, $5, $6, 'Pending') 
-            RETURNING bookingid; 
+        // Check if the booking already exists
+        const checkBookingQuery = `
+            SELECT bookingid FROM booking
+            WHERE type = $1 AND date = $2 AND time = $3 AND duration = $4 AND instructor = $5 AND room = $6 AND status = 'Pending';
         `;
+        const existingBooking = await pool.query(checkBookingQuery, [classType, date, time, duration, instructor, room]);
 
-        // Execute the query with the formatted date and time
-        const result = await pool.query(insertBookingQuery, [classType, date, time, duration, instructor, room]);
-
-        // If the insert was successful, send back a success response
-        if (result.rows.length > 0) {
-            res.json({ success: true, message: 'Booking request submitted successfully.', bookingId: result.rows[0].bookingid });
+        let bookingId;
+        if (existingBooking.rowCount > 0) {
+            // Booking exists, get the booking id
+            bookingId = existingBooking.rows[0].bookingid;
         } else {
-            // If no rows were inserted, send an error response
-            res.status(400).json({ success: false, message: 'Booking request could not be processed.' });
+            // Booking does not exist, create a new one
+            const insertBookingQuery = `
+                INSERT INTO booking (type, date, time, duration, instructor, room, status)
+                VALUES ($1, $2, $3, $4, $5, $6, 'Pending') 
+                RETURNING bookingid;
+            `;
+            const newBooking = await pool.query(insertBookingQuery, [classType, date, time, duration, instructor, room]);
+            bookingId = newBooking.rows[0].bookingid;
         }
+        console.log(memberId)
+        // Now, link the booking to the member in requestbooking entity
+        const insertRequestBookingQuery = `
+            INSERT INTO requestbooking (bookingid, memberid)
+            VALUES ($1, $2)
+            ON CONFLICT (bookingid, memberid) DO NOTHING;
+        `;
+        await pool.query(insertRequestBookingQuery, [bookingId, memberId]);
+
+        res.json({ success: true, message: 'Booking processed successfully.', bookingId: bookingId });
     } catch (error) {
-        // Log the error and send a 500 Internal Server Error response
-        console.error('Error submitting booking request:', error);
+        console.error('Error processing booking request:', error);
         res.status(500).json({ success: false, message: 'Internal server error while processing booking request.' });
     }
 });
+
+
+// app.post('/api/request-booking', async (req, res) => {
+//     // Destructure the body to get the required fields
+//     let { classType, date, time, duration, instructor, room } = req.body;
+
+//     try {
+//         // Ensure the date is in the format YYYY-MM-DD for PostgreSQL
+//         date = new Date(date).toISOString().split('T')[0]; // Converts the date to YYYY-MM-DD format
+        
+//         // Ensure the time is in the format HH:MM:SS for PostgreSQL
+//         time = time + ':00'; // Appends seconds to the time
+        
+//         // Construct the SQL query to insert the new booking
+//         const insertBookingQuery = `
+//             INSERT INTO booking (type, date, time, duration, instructor, room, status)
+//             VALUES ($1, $2, $3, $4, $5, $6, 'Pending') 
+//             RETURNING bookingid; 
+//         `;
+
+//         // Execute the query with the formatted date and time
+//         const result = await pool.query(insertBookingQuery, [classType, date, time, duration, instructor, room]);
+
+//         // If the insert was successful, send back a success response
+//         if (result.rows.length > 0) {
+//             res.json({ success: true, message: 'Booking request submitted successfully.', bookingId: result.rows[0].bookingid });
+//         } else {
+//             // If no rows were inserted, send an error response
+//             res.status(400).json({ success: false, message: 'Booking request could not be processed.' });
+//         }
+//     } catch (error) {
+//         // Log the error and send a 500 Internal Server Error response
+//         console.error('Error submitting booking request:', error);
+//         res.status(500).json({ success: false, message: 'Internal server error while processing booking request.' });
+//     }
+// });
 
 
 

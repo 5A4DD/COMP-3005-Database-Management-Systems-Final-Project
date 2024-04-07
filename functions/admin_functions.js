@@ -150,13 +150,12 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(bookings => {
                 const tableBody = document.getElementById('bookingTable').querySelector('tbody');
                 tableBody.innerHTML = '';
-    
+
                 bookings.forEach((booking) => {
                     const date = booking.date.split('T')[0];
-
                     const row = document.createElement('tr');
                     row.innerHTML = `
-                        <td><input type="checkbox" name="selectedBooking" value="${booking.bookingID}"></td>
+                        <td><input type="checkbox" class="booking-checkbox" name="selectedBooking" value="${booking.bookingid}" data-member-id="${booking.memberid}"></td>
                         <td>${booking.type}</td>
                         <td>${date}</td>
                         <td>${booking.time}</td>
@@ -167,6 +166,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     `;
                     tableBody.appendChild(row);
                 });
+
+                // Add event listeners to checkboxes
+                document.querySelectorAll('.booking-checkbox').forEach(checkbox => {
+                    checkbox.addEventListener('change', function() {
+                        if (this.checked) {
+                            console.log('Selected Member ID:', this.getAttribute('data-member-id'));
+                        }
+                    });
+                });
             })
             .catch(error => {
                 console.error('Error fetching booking data:', error);
@@ -175,6 +183,83 @@ document.addEventListener('DOMContentLoaded', () => {
 
     fetchAndDisplayBookings();  
 });
+
+document.getElementById('accept-button').addEventListener('click', function() {
+    handleSelection('accept');
+});
+
+document.getElementById('deny-button').addEventListener('click', function() {
+    handleSelection('deny');
+});
+
+function handleSelection(action) {
+    const selectedBookings = Array.from(document.querySelectorAll('.booking-checkbox:checked')).map(checkbox => {
+        return {
+            bookingId: checkbox.value,
+            memberId: checkbox.getAttribute('data-member-id')
+        };
+    });
+    console.log(selectedBookings);
+    if (selectedBookings.length > 0) {
+        // Send the selected bookings to the server
+        fetch(`/api/handle-bookings?action=${action}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ bookings: selectedBookings }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(`Bookings have been successfully ${action === 'accept' ? 'accepted' : 'denied'}.`);
+                fetchAndDisplayBookings(); // Refresh the list of bookings
+            } else {
+                alert(`Failed to ${action} bookings: ` + data.message);
+            }
+        })
+        .catch(error => {
+            console.error(`Error while trying to ${action} bookings:`, error);
+        });
+    } else {
+        alert('Please select at least one booking to accept or deny.');
+    }
+}
+
+
+// document.addEventListener('DOMContentLoaded', () => {
+
+//     function fetchAndDisplayBookings() {
+//         fetch('/api/get-bookings-events')
+//             .then(response => response.json())
+//             .then(bookings => {
+//                 const tableBody = document.getElementById('bookingTable').querySelector('tbody');
+//                 tableBody.innerHTML = '';
+    
+//                 bookings.forEach((booking) => {
+//                     const date = booking.date.split('T')[0];
+
+//                     const row = document.createElement('tr');
+//                     row.innerHTML = `
+//                         <td><input type="checkbox" name="selectedBooking" value="${booking.bookingID}"></td>
+//                         <td>${booking.type}</td>
+//                         <td>${date}</td>
+//                         <td>${booking.time}</td>
+//                         <td>${booking.duration}</td>
+//                         <td>${booking.room}</td>
+//                         <td>${booking.instructor}</td>
+//                         <td>${booking.memberid}</td>
+//                     `;
+//                     tableBody.appendChild(row);
+//                 });
+//             })
+//             .catch(error => {
+//                 console.error('Error fetching booking data:', error);
+//             });
+//     }
+
+//     fetchAndDisplayBookings();  
+// });
 
 
 
