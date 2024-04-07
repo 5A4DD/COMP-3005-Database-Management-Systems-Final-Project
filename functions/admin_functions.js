@@ -142,45 +142,44 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-document.addEventListener('DOMContentLoaded', () => {
+function fetchAndDisplayBookings() {
+    fetch('/api/get-bookings-events')
+        .then(response => response.json())
+        .then(bookings => {
+            const tableBody = document.getElementById('bookingTable').querySelector('tbody');
+            tableBody.innerHTML = '';
 
-    function fetchAndDisplayBookings() {
-        fetch('/api/get-bookings-events')
-            .then(response => response.json())
-            .then(bookings => {
-                const tableBody = document.getElementById('bookingTable').querySelector('tbody');
-                tableBody.innerHTML = '';
-
-                bookings.forEach((booking) => {
-                    const date = booking.date.split('T')[0];
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td><input type="checkbox" class="booking-checkbox" name="selectedBooking" value="${booking.bookingid}" data-member-id="${booking.memberid}"></td>
-                        <td>${booking.type}</td>
-                        <td>${date}</td>
-                        <td>${booking.time}</td>
-                        <td>${booking.duration}</td>
-                        <td>${booking.room}</td>
-                        <td>${booking.instructor}</td>
-                        <td>${booking.memberid}</td>
-                    `;
-                    tableBody.appendChild(row);
-                });
-
-                // Add event listeners to checkboxes
-                document.querySelectorAll('.booking-checkbox').forEach(checkbox => {
-                    checkbox.addEventListener('change', function() {
-                        if (this.checked) {
-                            console.log('Selected Member ID:', this.getAttribute('data-member-id'));
-                        }
-                    });
-                });
-            })
-            .catch(error => {
-                console.error('Error fetching booking data:', error);
+            bookings.forEach((booking) => {
+                const date = booking.date.split('T')[0];
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><input type="checkbox" class="booking-checkbox" name="selectedBooking" value="${booking.bookingid}" data-member-id="${booking.memberid}" data-instructor-id="${booking.instructor}"></td>
+                    <td>${booking.type}</td>
+                    <td>${date}</td>
+                    <td>${booking.time}</td>
+                    <td>${booking.duration}</td>
+                    <td>${booking.room}</td>
+                    <td>${booking.instructor}</td>
+                    <td>${booking.memberid}</td>
+                `;
+                tableBody.appendChild(row);
             });
-    }
 
+            // Add event listeners to checkboxes
+            document.querySelectorAll('.booking-checkbox').forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    if (this.checked) {
+                        console.log('Selected Member ID:', this.getAttribute('data-member-id'));
+                    }
+                });
+            });
+        })
+        .catch(error => {
+            console.error('Error fetching booking data:', error);
+        });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
     fetchAndDisplayBookings();  
 });
 
@@ -194,9 +193,11 @@ document.getElementById('deny-button').addEventListener('click', function() {
 
 function handleSelection(action) {
     const selectedBookings = Array.from(document.querySelectorAll('.booking-checkbox:checked')).map(checkbox => {
+        const row = checkbox.closest('tr')
         return {
             bookingId: checkbox.value,
-            memberId: checkbox.getAttribute('data-member-id')
+            memberId: checkbox.getAttribute('data-member-id'),
+            instructorId: checkbox.getAttribute('data-instructor-id')
         };
     });
     console.log(selectedBookings);

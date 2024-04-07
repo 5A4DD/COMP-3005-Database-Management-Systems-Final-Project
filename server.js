@@ -273,40 +273,50 @@ app.get('/api/get-bookings-events', async (req, res) => {
 });
 
 app.post('/api/handle-bookings', async (req, res) => {
-    const { bookings } = req.body; // This contains an array of { bookingId, memberId }
+    const { bookings } = req.body; // Array of { bookingId, memberId, instructorId }
     const action = req.query.action; // 'accept' or 'deny'
 
     try {
-        // Start a transaction
         await pool.query('BEGIN');
 
-        for (const { bookingId, memberId } of bookings) {
+        for (const { bookingId, memberId, instructorId } of bookings) {
             // Delete the requestbooking entry
             await pool.query('DELETE FROM requestbooking WHERE bookingid = $1 AND memberid = $2', [bookingId, memberId]);
 
             if (action === 'accept') {
-                // Get schedulemid from memberschedule that maps to memberid
-                const scheduleQuery = 'SELECT schedulemid FROM memberschedule WHERE memberid = $1';
-                const scheduleRes = await pool.query(scheduleQuery, [memberId]);
-                const schedulemid = scheduleRes.rows[0].schedulemid;
+                // Handle member schedule
+                const memberScheduleQuery = 'SELECT schedulemid FROM memberschedule WHERE memberid = $1';
+                const memberScheduleRes = await pool.query(memberScheduleQuery, [memberId]);
+                if (memberScheduleRes.rows.length > 0) {
+                    const schedulemid = memberScheduleRes.rows[0].schedulemid;
+                    const memberEventsInsertQuery = 'INSERT INTO eventsmember (bookingid, schedulemid) VALUES ($1, $2)';
+                    await pool.query(memberEventsInsertQuery, [bookingId, schedulemid]);
+                }
 
-                // Add the new entry of bookingid to schedulemid into eventsmember
-                const eventsMemberInsertQuery = 'INSERT INTO eventsmember (bookingid, schedulemid) VALUES ($1, $2)';
-                await pool.query(eventsMemberInsertQuery, [bookingId, schedulemid]);
+                // Handle trainer schedule
+                const trainerScheduleQuery = 'SELECT scheduletid FROM trainerschedule WHERE trainerid = $1';
+                const trainerScheduleRes = await pool.query(trainerScheduleQuery, [instructorId]);
+                if (trainerScheduleRes.rows.length > 0) {
+                    const scheduletid = trainerScheduleRes.rows[0].scheduletid;
+                    const updateBookingQuery = `
+                        UPDATE Booking 
+                        SET scheduletid = $1, status = 'Approved' 
+                        WHERE bookingid = $2
+                    `;
+                    await pool.query(updateBookingQuery, [scheduletid, bookingId]);
+                }
             }
         }
 
-        // Commit the transaction
         await pool.query('COMMIT');
-
         res.json({ success: true, message: `Bookings have been ${action === 'accept' ? 'accepted' : 'denied'}.` });
     } catch (error) {
-        // Rollback in case of an error
         await pool.query('ROLLBACK');
         console.error(`Error handling bookings: ${error}`);
         res.status(500).json({ success: false, message: 'Internal server error while processing bookings.' });
     }
 });
+
 
 
 app.post('/api/get-member-bookings', async (req, res) => {
