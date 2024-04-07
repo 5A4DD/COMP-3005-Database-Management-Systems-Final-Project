@@ -281,9 +281,11 @@ app.post('/api/handle-bookings', async (req, res) => {
 
         for (const { bookingId, memberId, instructorId } of bookings) {
             // Delete the requestbooking entry
-            await pool.query('DELETE FROM requestbooking WHERE bookingid = $1 AND memberid = $2', [bookingId, memberId]);
 
             if (action === 'accept') {
+
+                await pool.query('DELETE FROM requestbooking WHERE bookingid = $1 AND memberid = $2', [bookingId, memberId]);
+
                 // Handle member schedule
                 const memberScheduleQuery = 'SELECT schedulemid FROM memberschedule WHERE memberid = $1';
                 const memberScheduleRes = await pool.query(memberScheduleQuery, [memberId]);
@@ -305,6 +307,13 @@ app.post('/api/handle-bookings', async (req, res) => {
                     `;
                     await pool.query(updateBookingQuery, [scheduletid, bookingId]);
                 }
+            } else if (action === 'deny') {
+                const updateBookingStatusQuery = `
+                    UPDATE Booking 
+                    SET status = 'Declined' 
+                    WHERE bookingid = $1
+                `;
+                await pool.query(updateBookingStatusQuery, [bookingId]);
             }
         }
 
@@ -380,47 +389,6 @@ app.post('/api/request-booking', async (req, res) => {
         res.status(500).json({ success: false, message: 'Internal server error while processing booking request.' });
     }
 });
-
-
-// app.post('/api/request-booking', async (req, res) => {
-//     // Destructure the body to get the required fields
-//     let { classType, date, time, duration, instructor, room } = req.body;
-
-//     try {
-//         // Ensure the date is in the format YYYY-MM-DD for PostgreSQL
-//         date = new Date(date).toISOString().split('T')[0]; // Converts the date to YYYY-MM-DD format
-        
-//         // Ensure the time is in the format HH:MM:SS for PostgreSQL
-//         time = time + ':00'; // Appends seconds to the time
-        
-//         // Construct the SQL query to insert the new booking
-//         const insertBookingQuery = `
-//             INSERT INTO booking (type, date, time, duration, instructor, room, status)
-//             VALUES ($1, $2, $3, $4, $5, $6, 'Pending') 
-//             RETURNING bookingid; 
-//         `;
-
-//         // Execute the query with the formatted date and time
-//         const result = await pool.query(insertBookingQuery, [classType, date, time, duration, instructor, room]);
-
-//         // If the insert was successful, send back a success response
-//         if (result.rows.length > 0) {
-//             res.json({ success: true, message: 'Booking request submitted successfully.', bookingId: result.rows[0].bookingid });
-//         } else {
-//             // If no rows were inserted, send an error response
-//             res.status(400).json({ success: false, message: 'Booking request could not be processed.' });
-//         }
-//     } catch (error) {
-//         // Log the error and send a 500 Internal Server Error response
-//         console.error('Error submitting booking request:', error);
-//         res.status(500).json({ success: false, message: 'Internal server error while processing booking request.' });
-//     }
-// });
-
-
-
-
-
 
 app.get('/api/get-bookings-events', async (req, res) => {
     try {
