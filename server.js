@@ -17,8 +17,6 @@ const adminCredentials = {
     'charlieadmin@email.com': '6969'
 };
 
-let profileid = 3;
-
 const pool = require('./db');
 
 app.use(express.json()); 
@@ -28,6 +26,8 @@ app.use(express.static('views'));
 app.use('/styles', express.static('styles'));
 
 app.use('/functions', express.static('functions'));
+
+app.use('/images', express.static('images'))
 
 app.get('/index.html', (req, res) => {
     res.sendFile('index.html', { root: './views/Member' });
