@@ -28,6 +28,8 @@
                     <th>Room</th>
                     <th>Trainer ID</th>
                     <th>Member ID</th>
+                    <th>Trainer Available</th>
+                    <th>Equipment Status</th>
                 </tr>
             </thead>
             <tbody>
@@ -47,11 +49,8 @@
     <script src="../../functions/admin_functions.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // Retrieve admin name and ID from local storage
             const adminName = localStorage.getItem('adminName');
             const adminId = localStorage.getItem('adminId');
-        
-            // Update navbar or the designated areas with the admin's name and ID
             const navBar = document.querySelector('nav ul');
             if (navBar) {
                 navBar.insertAdjacentHTML('beforeend', `

@@ -1,5 +1,3 @@
-<!-- dashboard.html -->
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -16,22 +14,18 @@
             <ul>
                 <li><a href="/profile.html">Profile</a></li>
                 <li><a href="/dashboard.html" class="active">Dashboard</a></li>
-                <!-- Add other navigation items here -->
             </ul>
         </nav>
     </header>
     <main>
         <section id="routineSection">
             <h2>Exercise Routines</h2>
-            <!-- Exercise routine content will be dynamically loaded here -->
         </section>
         <section id="achievementsSection">
             <h2>Fitness Achievements</h2>
-            <!-- Fitness achievements content will be dynamically loaded here -->
         </section>
         <section id="statsSection">
             <h2>Health Statistics</h2>
-            <!-- Health statistics content will be dynamically loaded here -->
         </section>
     </main>
     <footer>
@@ -40,11 +34,9 @@
     <script src="../../functions/member_functions.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // Retrieve member name and ID from local storage
             const memberName = localStorage.getItem('memberName');
             const memberId = localStorage.getItem('memberId');
 
-            // Update navbar or the designated areas with the member's name and ID
             document.getElementById('profileName').textContent = "Name: " + memberName;
             document.getElementById('memberId').textContent = "Member ID: " + memberId;
         });

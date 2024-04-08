@@ -1,13 +1,10 @@
-//server.js
-
 const express = require('express');
 const { Pool } = require('pg');
 const app = express();
 const port = 3000;
 
-// Initialize dictionaries for storing login credentials
-// const memberCredentials = {};
-const memberCredentials = {     //only this one is dynamic (it can grow as more people register as members)
+
+const memberCredentials = {     
     'Q@Q': '1111',
     'alicewong@email.com': '2222',
     'bobjohnson@email.com': '3333'
@@ -22,20 +19,16 @@ const adminCredentials = {
 
 let profileid = 3;
 
-// PostgreSQL pool setup
 const pool = require('./db');
 
 app.use(express.json()); 
-app.use(express.urlencoded({ extended: true }));// This is required to parse JSON request bodies
+app.use(express.urlencoded({ extended: true }));
 
-// Serve static files from 'views' folder
 app.use(express.static('views'));
 app.use('/styles', express.static('styles'));
 
-// Serve the 'functions' directory
 app.use('/functions', express.static('functions'));
 
-// Redirect root to Member's index.html
 app.get('/index.html', (req, res) => {
     res.sendFile('index.html', { root: './views/Member' });
 });
@@ -92,11 +85,8 @@ app.get('/view-schedule.html', (req, res) => {
     res.sendFile('view-schedule.html', { root: './views/Trainer' });
 });
 
-
-//MEMBER REGISTER
 app.post('/api/register', async (req, res) => {
     try {
-        // Extract data from the request body
         const {
             firstName,
             lastName,
@@ -119,28 +109,22 @@ app.post('/api/register', async (req, res) => {
                 fName, lName, gender, emailAddr, phone, homeNum, streetName, postalCode, dateOfBirth
             ) VALUES (
                 $1, $2, $3, $4, $5, $6, $7, $8, $9
-            ) RETURNING memberID`;  // Use RETURNING * to get the inserted row
+            ) RETURNING memberID`;  
 
         const memberValues = [firstName, lastName, gender, email, phone, homeNum, streetName, postalCode, dob];
         const memberResult = await pool.query(insertMemberQuery, memberValues);
         const memberId = memberResult.rows[0].memberid;
 
-        // Then, create a blank profile for this member
         const insertProfileQuery = `
             INSERT INTO Profile (memberID, status, weight, bloodPressure, bodyFat)
             VALUES ($1, 'Active', NULL, NULL, NULL)
-            RETURNING profileID;`; // This assumes you want to set the status to 'Active' by default
+            RETURNING profileID;`; 
 
         const profileResult = await pool.query(insertProfileQuery, [memberId]);
         const profileId = profileResult.rows[0].profileid;
-
-        // Lastly, update the Member table with the new profileID
-        // This step seems unnecessary if the profileID and memberID are meant to be the same, 
-        // but let's proceed as per your requirement
         const updateMemberQuery = `UPDATE Member SET profileID = $1 WHERE memberID = $2;`;
         await pool.query(updateMemberQuery, [profileId, memberId]);
 
-        // Send the response with the inserted member
         res.json({ success: true, message: 'Member and profile created successfully.', member: memberResult.rows[0], profile: profileResult.rows[0] });
     } catch (err) {
         console.error('Error during registration:', err);
@@ -148,12 +132,9 @@ app.post('/api/register', async (req, res) => {
     }
 });
 
-//MEMBER LOGIN
 app.post('/api/login', async (req, res) => {
     const { email, password } = req.body;
-    // Check the credentials against the stored dictionary
     if (memberCredentials[email] && memberCredentials[email] === password) {
-        // Query database for user's name
         const query = 'SELECT memberid, fName FROM Member WHERE emailAddr = $1';
         try {
             const dbRes = await pool.query(query, [email]);
@@ -161,7 +142,6 @@ app.post('/api/login', async (req, res) => {
             console.log("LOGIN SUCCESSFULL!");
 
             if (dbRes.rows.length > 0) {
-                // Send name in response
                 console.log(dbRes.rows[0].fname + " " + dbRes.rows[0].memberid)
                 res.json({ success: true, message: 'Login successful.', fname: dbRes.rows[0].fname, memberid: dbRes.rows[0].memberid });
             } else {
@@ -172,17 +152,14 @@ app.post('/api/login', async (req, res) => {
             res.status(500).json({ success: false, message: 'Internal server error' });
         }
     } else {
-        // Incorrect credentials, login fail
         res.status(401).json({ success: false, message: 'Invalid email or password.' });
     }
 });
 
-//MEMBER UPDATE PROFILE HEALTH STATS
 app.post('/api/updateProfile', async (req, res) => {
     const { memberId, weight, bloodPressure, bodyFat } = req.body;
 
     try {
-        // Profile exists, so update it
         const updateProfileQuery = `
             UPDATE profile
             SET weight = $2, bloodpressure = $3, bodyfat = $4
@@ -197,7 +174,6 @@ app.post('/api/updateProfile', async (req, res) => {
     }
 });
 
-//MEMBER UPDATE INITIAL REGISTER INFO
 app.post('/api/updateUserInfo/:memberId', async (req, res) => {
     const { memberId } = req.params;
     const { email, phone, homeNum, streetName, postalCode } = req.body;
@@ -224,23 +200,18 @@ app.post('/api/updateUserInfo/:memberId', async (req, res) => {
     }
 });
 
-// Route to handle equipment maintenance log submission
 app.post('/submit-maintenance-log', async (req, res) => {
     try {
-        // Extract data from the request body
         const { equipmentID, maintenanceDate, location, score, adminID } = req.body;
 
-        // Check if the equipment with the given ID exists
         const checkEquipmentQuery = 'SELECT * FROM Equipment WHERE equipmentID = $1';
         const checkEquipmentValues = [equipmentID];
         const equipmentExists = await pool.query(checkEquipmentQuery, checkEquipmentValues);
 
         if (equipmentExists.rows.length === 0) {
-            // Equipment with the given ID does not exist
             return res.status(404).send('Equipment not found');
         }
 
-        // Update the last monitored date and score in the Equipment table
         const updateEquipmentQuery = `
             UPDATE Equipment
             SET lastMonitored = $1, score = $2, monitoringAdmin = $3
@@ -273,20 +244,18 @@ app.get('/api/get-bookings-events', async (req, res) => {
 });
 
 app.post('/api/handle-bookings', async (req, res) => {
-    const { bookings } = req.body; // Array of { bookingId, memberId, instructorId }
-    const action = req.query.action; // 'accept' or 'deny'
+    const {bookings, adminId} = req.body;
+    const action = req.query.action;
+    console.log(adminId);
 
     try {
         await pool.query('BEGIN');
 
         for (const { bookingId, memberId, instructorId } of bookings) {
-            // Delete the requestbooking entry
-
             if (action === 'accept') {
 
                 await pool.query('DELETE FROM requestbooking WHERE bookingid = $1 AND memberid = $2', [bookingId, memberId]);
 
-                // Handle member schedule
                 const memberScheduleQuery = 'SELECT schedulemid FROM memberschedule WHERE memberid = $1';
                 const memberScheduleRes = await pool.query(memberScheduleQuery, [memberId]);
                 if (memberScheduleRes.rows.length > 0) {
@@ -295,25 +264,24 @@ app.post('/api/handle-bookings', async (req, res) => {
                     await pool.query(memberEventsInsertQuery, [bookingId, schedulemid]);
                 }
 
-                // Handle trainer schedule
                 const trainerScheduleQuery = 'SELECT scheduletid FROM trainerschedule WHERE trainerid = $1';
                 const trainerScheduleRes = await pool.query(trainerScheduleQuery, [instructorId]);
                 if (trainerScheduleRes.rows.length > 0) {
                     const scheduletid = trainerScheduleRes.rows[0].scheduletid;
                     const updateBookingQuery = `
                         UPDATE Booking 
-                        SET scheduletid = $1, status = 'Approved' 
-                        WHERE bookingid = $2
+                        SET scheduletid = $1, status = 'Approved', processingadmin = $2 
+                        WHERE bookingid = $3
                     `;
-                    await pool.query(updateBookingQuery, [scheduletid, bookingId]);
+                    await pool.query(updateBookingQuery, [scheduletid, adminId, bookingId]);
                 }
             } else if (action === 'deny') {
                 const updateBookingStatusQuery = `
                     UPDATE Booking 
-                    SET status = 'Declined' 
-                    WHERE bookingid = $1
+                    SET status = 'Declined', processingadmin = $1 
+                    WHERE bookingid = $2
                 `;
-                await pool.query(updateBookingStatusQuery, [bookingId]);
+                await pool.query(updateBookingStatusQuery, [adminId, bookingId]);
             }
         }
 
@@ -325,8 +293,6 @@ app.post('/api/handle-bookings', async (req, res) => {
         res.status(500).json({ success: false, message: 'Internal server error while processing bookings.' });
     }
 });
-
-
 
 app.post('/api/get-member-bookings', async (req, res) => {
     const { member_Id } = req.body;
@@ -351,31 +317,59 @@ app.post('/api/get-member-bookings', async (req, res) => {
 
 app.post('/api/request-booking', async (req, res) => {
     const { memberId, classType, date, time, duration, instructor, room } = req.body;
+    let trainerAvailable = false;
+    let equipmentStatus = false;
 
     try {
-        // Check if the booking already exists
+        const startTime = new Date(`${date}T${time}`);
+        const endTime = new Date(startTime.getTime() + duration * 60000);
+
+        const dayOfWeek = startTime.toLocaleString('en-US', { weekday: 'long' });
+
+        const trainerAvailabilityQuery = `
+            SELECT a.*
+            FROM traineravailability ta
+            JOIN availability a ON ta.availabilityid = a.availabilityid
+            WHERE ta.trainerid = $1 AND a.day = $2;
+        `;
+        const availabilityRes = await pool.query(trainerAvailabilityQuery, [instructor, dayOfWeek]);
+        availabilityRes.rows.forEach(avail => {
+            const availStartTime = new Date(`${date}T${avail.starttime}`);
+            const availEndTime = new Date(`${date}T${avail.endtime}`);
+            if (availStartTime <= startTime && availEndTime >= endTime) {
+                trainerAvailable = true;
+            }
+        });
+
+        const equipmentScoreQuery = `
+            SELECT score FROM equipment
+            WHERE location = $1;
+        `;
+        const equipmentRes = await pool.query(equipmentScoreQuery, [room]);
+        if (equipmentRes.rows.length > 0) {
+            const { score } = equipmentRes.rows[0];
+            equipmentStatus = score >= 7;
+        }
+
         const checkBookingQuery = `
             SELECT bookingid FROM booking
-            WHERE type = $1 AND date = $2 AND time = $3 AND duration = $4 AND instructor = $5 AND room = $6 AND status = 'Pending';
+            WHERE type = $1 AND date = $2 AND time = $3 AND duration = $4 AND instructor = $5 AND room = $6;
         `;
         const existingBooking = await pool.query(checkBookingQuery, [classType, date, time, duration, instructor, room]);
 
         let bookingId;
         if (existingBooking.rowCount > 0) {
-            // Booking exists, get the booking id
             bookingId = existingBooking.rows[0].bookingid;
         } else {
-            // Booking does not exist, create a new one
             const insertBookingQuery = `
-                INSERT INTO booking (type, date, time, duration, instructor, room, status)
-                VALUES ($1, $2, $3, $4, $5, $6, 'Pending') 
+                INSERT INTO booking (type, date, time, duration, instructor, room, status, traineravailable, equipmentstatus)
+                VALUES ($1, $2, $3, $4, $5, $6, 'Pending', $7, $8) 
                 RETURNING bookingid;
             `;
-            const newBooking = await pool.query(insertBookingQuery, [classType, date, time, duration, instructor, room]);
+            const newBooking = await pool.query(insertBookingQuery, [classType, date, time, duration, instructor, room, trainerAvailable, equipmentStatus]);
             bookingId = newBooking.rows[0].bookingid;
         }
-        console.log(memberId)
-        // Now, link the booking to the member in requestbooking entity
+
         const insertRequestBookingQuery = `
             INSERT INTO requestbooking (bookingid, memberid)
             VALUES ($1, $2)
@@ -383,7 +377,7 @@ app.post('/api/request-booking', async (req, res) => {
         `;
         await pool.query(insertRequestBookingQuery, [bookingId, memberId]);
 
-        res.json({ success: true, message: 'Booking processed successfully.', bookingId: bookingId });
+        res.json({ success: true, message: 'Booking processed successfully.', bookingId: bookingId, trainerAvailable, equipmentStatus });
     } catch (error) {
         console.error('Error processing booking request:', error);
         res.status(500).json({ success: false, message: 'Internal server error while processing booking request.' });
@@ -408,15 +402,40 @@ app.get('/api/get-bookings-events', async (req, res) => {
 });
 
 
-// Route to fetch all equipment data
+app.post('/api/cancel-booking', async (req, res) => {
+    const { bookingId, memberId } = req.body;
+
+    try {
+        await pool.query('BEGIN');
+
+        const scheduleQuery = 'SELECT schedulemid FROM memberschedule WHERE memberid = $1';
+        const scheduleResult = await pool.query(scheduleQuery, [memberId]);
+
+        if (scheduleResult.rowCount > 0) {
+            const { schedulemid } = scheduleResult.rows[0];
+
+            const deleteQuery = 'DELETE FROM eventsmember WHERE bookingid = $1 AND schedulemid = $2';
+            await pool.query(deleteQuery, [bookingId, schedulemid]);
+
+            await pool.query('COMMIT');
+            
+            res.json({ success: true, message: 'Booking cancelled successfully.' });
+        } else {
+            throw new Error('No associated schedule found for member.');
+        }
+    } catch (error) {
+        await pool.query('ROLLBACK');
+        console.error('Error during booking cancellation:', error);
+        res.status(500).json({ success: false, message: 'Failed to cancel booking.' });
+    }
+});
+
 app.get('/get-equipment', async (req, res) => {
     try {
-        // Query all equipment data from the database
         const getAllEquipmentQuery = 'SELECT * FROM Equipment';
         
         const equipmentData = await pool.query(getAllEquipmentQuery);
 
-        // Send the equipment data as JSON response
         res.json(equipmentData.rows);
     } catch (err) {
         console.error('Error fetching equipment data:', err);
@@ -427,7 +446,7 @@ app.get('/get-equipment', async (req, res) => {
 app.post('/issue-invoice', async (req, res) => {
     try {
         const { type, dateBilled, amount, processingAdmin, payee } = req.body;
-        const dateIssued = new Date().toISOString().slice(0, 10); // Get the current date in YYYY-MM-DD format
+        const dateIssued = new Date().toISOString().slice(0, 10);
 
         const insertQuery = `
             INSERT INTO Payment (type, dateIssued, dateBilled, amount, processingAdmin, payee)
@@ -465,10 +484,8 @@ app.get('/get-payments', async (req, res) => {
 
 
 app.post('/submit-availability', async (req, res) => {
-    // Assuming you have some way to determine the trainerID, possibly through authentication
-    const trainerID = req.body.trainerId; // Placeholder for the actual trainer ID
+    const trainerID = req.body.trainerId; 
 
-    // Define days as an array to iterate over
     const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
     try {
@@ -477,7 +494,6 @@ app.post('/submit-availability', async (req, res) => {
             let endTime = req.body[day + '_out'];
             const allDay = req.body[day + '_allday'];
 
-            // Skip the day if both startTime and endTime are empty and allDay is not checked
             if (!startTime && !endTime && !allDay) {
                 continue;
             }
@@ -487,7 +503,6 @@ app.post('/submit-availability', async (req, res) => {
                 endTime = '23:59:59';
             }
 
-            // Capitalize the first letter of the day name
             const capitalizedDay = day.charAt(0).toUpperCase() + day.slice(1);
 
             const availabilityCheckQuery = `
@@ -541,7 +556,6 @@ app.post('/search-member', async (req, res) => {
     const { first_name, last_name, trainer_id} = req.body;
 
     try {
-        // Perform a query to get the profile details by first name and last name
         const profileQuery = `
             SELECT p.profileID, p.weight, p.bloodPressure, p.bodyFat, p.status,
                    m.memberID, m.fName, m.lName, m.gender, m.emailAddr, m.phone, 
@@ -553,11 +567,9 @@ app.post('/search-member', async (req, res) => {
         const profileResult = await pool.query(profileQuery, [first_name, last_name]);
 
         if (profileResult.rows.length === 0) {
-            // No profile found with the provided first name and last name
             return res.status(404).json({ message: 'Profile not found.' });
         }
         console.log(profileResult.rows)
-        // Send the found profile details as JSON
         res.json(profileResult.rows);
     } catch (error) {
         console.error('Error in /search-member:', error);
@@ -570,9 +582,7 @@ app.post('/search-member', async (req, res) => {
 
 app.post('/api/trainerLogin', async (req, res) => {
     const { email, password } = req.body;
-    // Check the credentials against the trainerCredentials
     if (trainerCredentials[email] && trainerCredentials[email] === password) {
-        // If credentials match, query the database for trainer details
         const query = 'SELECT trainerid, fname FROM trainer WHERE emailaddr = $1';
         try {
             const dbRes = await pool.query(query, [email]);
@@ -590,11 +600,8 @@ app.post('/api/trainerLogin', async (req, res) => {
     }
 });
 
-
-// Trainer Get booking
-// Endpoint to get bookings by trainerId
 app.get('/api/get-trainer-bookings', async (req, res) => {
-    const { trainerId } = req.query;  // Assuming trainerId is passed as a query parameter
+    const { trainerId } = req.query;  
 
     try {
         const query = `
@@ -609,16 +616,10 @@ app.get('/api/get-trainer-bookings', async (req, res) => {
     }
 });
 
-
-
-
-
 app.post('/api/adminLogin', async (req, res) => {
     const { email, password } = req.body;
 
-    // Check the credentials against the adminCredentials (implement adminCredentials as per your logic)
     if (adminCredentials[email] && adminCredentials[email] === password) {
-        // If credentials match, query the database for admin details
         const query = 'SELECT adminid, fname FROM admin WHERE emailaddr = $1';
         try {
             const dbRes = await pool.query(query, [email]);
@@ -636,7 +637,6 @@ app.post('/api/adminLogin', async (req, res) => {
     }
 });
 
-// Start the server at the homepage
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}/index.html`);
 }); 

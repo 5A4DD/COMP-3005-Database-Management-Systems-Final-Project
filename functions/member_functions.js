@@ -1,8 +1,6 @@
-// member_functions.js
 document.addEventListener('DOMContentLoaded', function () {
     console.log('Document loaded.');
-
-    // Handle registration form submission
+    const memberId = localStorage.getItem('memberId');
     const registerForm = document.getElementById('registerForm');
     if (registerForm) {
         registerForm.addEventListener('submit', function (e) {
@@ -31,7 +29,7 @@ document.addEventListener('DOMContentLoaded', function () {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    window.location.href = '/login.html'; // Redirect to login after registration
+                    window.location.href = '/login.html';
                 } else {
                     alert('Registration failed: ' + data.message);
                 }
@@ -42,15 +40,11 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    
-
-    // Handle create profile form submission
     const createProfileForm = document.getElementById('createProfileForm');
     if (createProfileForm) {
         createProfileForm.addEventListener('submit', function (e) {
             e.preventDefault();
 
-            const memberId = localStorage.getItem('memberId');
 
             console.log("IN PROFILE MEMBERID" + memberId);
             const formData = {
@@ -81,10 +75,9 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    const bookingTable = document.getElementById('bookingTable');
-    console.log(bookingTable);
-    if (bookingTable) {
-        const memberId = localStorage.getItem('memberId');
+    function fetchAndDisplayBookings() {
+        if (!bookingTable) return;
+
         console.log("IN BOOKING TABLE------------" + memberId);
         fetch('/api/get-member-bookings', {
             method: 'POST',
@@ -102,14 +95,9 @@ document.addEventListener('DOMContentLoaded', function () {
         .then(bookings => {
             const bookingTableBody = document.querySelector('#bookingTable tbody');
             bookingTableBody.innerHTML = bookings.map(booking => {
-                // Format the date and time
-                console.log(booking.date);
-                const date = new Date(booking.date);
-                const formattedDate = date.toLocaleDateString('en-US', {
+                const formattedDate = new Date(booking.date).toLocaleDateString('en-US', {
                     year: 'numeric', month: 'long', day: 'numeric'
                 });
-
-                // Now return the table row with the formatted date and time
                 return `
                     <tr>
                         <td>${booking.type}</td>
@@ -118,20 +106,57 @@ document.addEventListener('DOMContentLoaded', function () {
                         <td>${booking.duration}</td>
                         <td>${booking.room}</td>
                         <td>${booking.instructor}</td>
+                        <td><button class="cancel-booking-btn" data-booking-id="${booking.bookingid}">Cancel</button></td>
                     </tr>
                 `;
             }).join('');
+            addCancelButtonsEventListeners();
         })
         .catch(error => {
             console.error('Error fetching member bookings:', error);
         });
     }
 
+    function addCancelButtonsEventListeners() {
+        const cancelButtons = document.querySelectorAll('.cancel-booking-btn');
+        cancelButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                console.log('Cancel button clicked');
+                const bookingId = this.getAttribute('data-booking-id');
+                fetch('/api/cancel-booking', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ bookingId, memberId }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Booking cancelled successfully.');
+                        fetchAndDisplayBookings(); 
+                    } else {
+                        alert('Failed to cancel booking: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error cancelling booking:', error);
+                });
+            });
+        });
+    }
+
+    const bookingTable = document.getElementById('bookingTable');
+    console.log(bookingTable);
+
+    if (bookingTable) {
+        fetchAndDisplayBookings();
+    }
+
     const bookingRequestForm = document.getElementById('bookingRequestForm');
     if (bookingRequestForm) {
         bookingRequestForm.addEventListener('submit', function(e) {
-            e.preventDefault(); // Prevents the default form submission
-            const memberId = localStorage.getItem('memberId');
+            e.preventDefault(); 
             console.log(memberId);
             const bookingData = {
                 memberId: memberId,
@@ -143,7 +168,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 room: document.getElementById('room').value,
             };
 
-            // Replace '/api/request-booking' with your actual endpoint that handles the booking request
             fetch('/api/request-booking', {
                 method: 'POST',
                 headers: {
@@ -216,8 +240,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 targetPace: document.getElementById('targetPace').value,
                 targetBodyFat: document.getElementById('targetBodyFat').value,
             };
-
-            const memberId = localStorage.getItem('memberId'); // Assuming member ID is stored in localStorage
 
             fetch(`/api/updateFitnessGoals/${memberId}`, {
                 method: 'POST',
