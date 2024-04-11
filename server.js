@@ -255,6 +255,56 @@ app.get('/api/memberHealthStats/:memberId', async (req, res) => {
     }
 });
 
+app.post('/api/updateFitnessGoals/:memberId', async (req, res) => {
+    const memberId = parseInt(req.params.memberId);
+    const { targetWeight, targetPace, targetBodyFat } = req.body;
+
+    try {
+        await pool.query('BEGIN');
+
+        const profileGoalsQuery = `
+            SELECT g.goalid
+            FROM profilegoals pg
+            JOIN goal g ON pg.goalid = g.goalid
+            WHERE pg.profileid = $1;
+        `;
+        const existingGoalsRes = await pool.query(profileGoalsQuery, [memberId]);
+
+        let goalId;
+        if (existingGoalsRes.rowCount > 0) {
+            goalId = existingGoalsRes.rows[0].goalid;
+            const updateGoalQuery = `
+                UPDATE goal
+                SET targetweight = $2, targetpace = $3, targetbodyfat = $4
+                WHERE goalid = $1
+                RETURNING *;
+            `;
+            await pool.query(updateGoalQuery, [goalId, targetWeight, targetPace, targetBodyFat]);
+        } else {
+            const insertGoalQuery = `
+                INSERT INTO goal (targetweight, targetpace, targetbodyfat)
+                VALUES ($1, $2, $3)
+                RETURNING goalid;
+            `;
+            const goalRes = await pool.query(insertGoalQuery, [targetWeight, targetPace, targetBodyFat]);
+            goalId = goalRes.rows[0].goalid;
+
+            const insertProfileGoalQuery = `
+                INSERT INTO profilegoals (profileid, goalid)
+                VALUES ($1, $2);
+            `;
+            await pool.query(insertProfileGoalQuery, [memberId, goalId]);
+        }
+        await pool.query('COMMIT');
+        
+        res.json({ success: true, message: 'Fitness goals updated successfully.', goalId: goalId });
+    } catch (error) {
+        await pool.query('ROLLBACK');
+        console.error('Error updating fitness goals:', error);
+        res.status(500).json({ success: false, message: 'Error updating fitness goals.' });
+    }
+});
+
 app.post('/submit-maintenance-log', async (req, res) => {
     try {
         const { equipmentID, maintenanceDate, location, score, adminID } = req.body;

@@ -313,5 +313,34 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    
+    const updateFitnessGoalsForm = document.getElementById('updateFitnessGoalsForm');
+    if (updateFitnessGoalsForm) {
+        updateFitnessGoalsForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            const memberId = localStorage.getItem('memberId');
+
+            const fitnessGoalsData = {
+                targetWeight: document.getElementById('targetWeight').value,
+                targetPace: document.getElementById('targetPace').value,
+                targetBodyFat: document.getElementById('targetBodyFat').value,
+            };
+
+            fetch(`/api/updateFitnessGoals/${memberId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(fitnessGoalsData),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Fitness goals updated successfully.');
+                } else {
+                    alert('Failed to update fitness goals: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error updating fitness goals:', error);
+            });
+        });
+    }
 });
