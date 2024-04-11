@@ -200,6 +200,61 @@ app.post('/api/updateUserInfo/:memberId', async (req, res) => {
     }
 });
 
+app.get('/api/memberRoutines/:memberId', async (req, res) => {
+    const memberId = parseInt(req.params.memberId);
+
+    try {
+        const routinesQuery = `
+            SELECT ex.name, ex.description 
+            FROM profileroutines pr
+            INNER JOIN exercise ex ON pr.exerciseid = ex.exerciseid
+            WHERE pr.profileid = $1;
+        `;
+        const routinesRes = await pool.query(routinesQuery, [memberId]);
+        res.json({ success: true, routines: routinesRes.rows });
+    } catch (error) {
+        console.error('Error fetching member routines:', error);
+        res.status(500).json({ success: false, message: 'Internal server error while fetching member routines.' });
+    }
+});
+
+app.get('/api/memberAchievements/:memberId', async (req, res) => {
+    const { memberId } = req.params;
+
+    try {
+        const achievementsQuery = `
+            SELECT g.goalid, g.targetweight, g.targetpace, g.targetbodyfat
+            FROM profileachievements pa
+            JOIN achievements a ON pa.achievid = a.achievid
+            JOIN goal g ON a.goalid = g.goalid
+            JOIN profilegoals pg ON pg.goalid = g.goalid
+            WHERE pg.profileid = $1;
+        `;
+        const achievementsRes = await pool.query(achievementsQuery, [memberId]);
+        res.json({ success: true, achievements: achievementsRes.rows });
+    } catch (error) {
+        console.error('Error fetching member achievements:', error);
+        res.status(500).json({ success: false, message: 'Internal server error while fetching member achievements.' });
+    }
+});
+
+app.get('/api/memberHealthStats/:memberId', async (req, res) => {
+    const memberId = parseInt(req.params.memberId);
+
+    try {
+        const healthStatsQuery = `
+            SELECT weight, bloodpressure, bodyfat
+            FROM profile
+            WHERE memberid = $1;
+        `;
+        const healthStatsRes = await pool.query(healthStatsQuery, [memberId]);
+        res.json({ success: true, healthStats: healthStatsRes.rows[0] });
+    } catch (error) {
+        console.error('Error fetching member health stats:', error);
+        res.status(500).json({ success: false, message: 'Internal server error while fetching member health stats.' });
+    }
+});
+
 app.post('/submit-maintenance-log', async (req, res) => {
     try {
         const { equipmentID, maintenanceDate, location, score, adminID } = req.body;
@@ -401,7 +456,6 @@ app.get('/api/get-bookings-events', async (req, res) => {
     }
 });
 
-
 app.post('/api/cancel-booking', async (req, res) => {
     const { bookingId, memberId } = req.body;
 
@@ -468,7 +522,7 @@ app.get('/get-payments', async (req, res) => {
     try {
         const query = `
             SELECT p.paymentid, p.type, p.dateissued, p.datebilled, p.amount, p.processingadmin, 
-                   m.fName || ' ' || m.lName AS payee
+                m.fName || ' ' || m.lName AS payee
             FROM Payment p
             INNER JOIN Profile pf ON p.payee = pf.profileid
             INNER JOIN Member m ON pf.memberID = m.memberID;
@@ -480,8 +534,6 @@ app.get('/get-payments', async (req, res) => {
         res.status(500).send('Internal server error');
     }
 });
-
-
 
 app.post('/submit-availability', async (req, res) => {
     const trainerID = req.body.trainerId; 
@@ -558,8 +610,8 @@ app.post('/search-member', async (req, res) => {
     try {
         const profileQuery = `
             SELECT p.profileID, p.weight, p.bloodPressure, p.bodyFat, p.status,
-                   m.memberID, m.fName, m.lName, m.gender, m.emailAddr, m.phone, 
-                   CONCAT(m.homeNum, ' ', m.streetName) AS address
+                m.memberID, m.fName, m.lName, m.gender, m.emailAddr, m.phone, 
+                CONCAT(m.homeNum, ' ', m.streetName) AS address
             FROM Profile p
             LEFT JOIN Member m ON p.profileID = m.memberID
             WHERE m.fName = $1 AND m.lName = $2;
@@ -576,9 +628,6 @@ app.post('/search-member', async (req, res) => {
         res.status(500).json({ message: 'Internal server error.' });
     }
 });
-
-
-
 
 app.post('/api/trainerLogin', async (req, res) => {
     const { email, password } = req.body;

@@ -1,6 +1,67 @@
+function fetchAndDisplayRoutines(memberId) {
+    fetch(`/api/memberRoutines/${memberId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const routinesElement = document.getElementById('routineSection');
+                data.routines.forEach(routine => {
+                    const div = document.createElement('div');
+                    div.innerHTML = `<strong>${routine.name}</strong>: ${routine.description}`;
+                    routinesElement.appendChild(div);
+                });
+            } else {
+                console.error('Failed to fetch routines:', data.message);
+            }
+        })
+        .catch(error => console.error('Error fetching routines:', error));
+}
+
+function fetchAndDisplayAchievements(memberId) {
+    fetch(`/api/memberAchievements/${memberId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const achievementsElement = document.getElementById('achievementsSection');
+                data.achievements.forEach(achievement => {
+                    const div = document.createElement('div');
+                    div.innerHTML = `Goal ID: ${achievement.goalid}, Target Weight: ${achievement.targetweight}, Target Pace: ${achievement.targetpace}, Target Body Fat: ${achievement.targetbodyfat}`;
+                    achievementsElement.appendChild(div);
+                });
+            } else {
+                console.error('Failed to fetch achievements:', data.message);
+            }
+        })
+        .catch(error => console.error('Error fetching achievements:', error));
+}
+
+function fetchAndDisplayHealthStats(memberId) {
+    fetch(`/api/memberHealthStats/${memberId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.healthStats) {
+                const healthStatsElement = document.getElementById('statsSection');
+                healthStatsElement.innerHTML += `
+                    <div>Weight: ${data.healthStats.weight}</div>
+                    <div>Blood Pressure: ${data.healthStats.bloodpressure}</div>
+                    <div>Body Fat: ${data.healthStats.bodyfat}</div>
+                `;
+            } else {
+                console.error('Failed to fetch health stats:', data.message);
+            }
+        })
+        .catch(error => console.error('Error fetching health stats:', error));
+}
+
 document.addEventListener('DOMContentLoaded', function () {
     console.log('Document loaded.');
     const memberId = localStorage.getItem('memberId');
+
+    if (memberId && window.location.pathname.endsWith('/dashboard.html')) {
+        fetchAndDisplayRoutines(memberId);
+        fetchAndDisplayAchievements(memberId);
+        fetchAndDisplayHealthStats(memberId);
+    }
+
     const registerForm = document.getElementById('registerForm');
     if (registerForm) {
         registerForm.addEventListener('submit', function (e) {
