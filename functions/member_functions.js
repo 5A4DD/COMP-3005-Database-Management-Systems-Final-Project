@@ -85,10 +85,10 @@ function deletePayment(paymentId) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            alert('Payment successfully deleted!');
+            alert('Payment successful!');
             const row = document.getElementById(`payment-${paymentId}`);
             if (row) {
-                row.remove(); // Remove the payment row from the table
+                row.remove();
             }
         } else {
             alert('Failed to delete payment: ' + data.message);
@@ -302,7 +302,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    //updating member info in profile.html
     const updateForm = document.getElementById('updateUserInfoForm');
     updateForm.addEventListener('submit', function(e) {
         e.preventDefault();
@@ -315,7 +314,6 @@ document.addEventListener('DOMContentLoaded', function () {
             postalCode: document.getElementById('updatePostalCode').value,
         };
 
-        //assuming you store memberId or a similar identifier in localStorage or another client-side storage
         const memberId = localStorage.getItem('memberId');
 
         fetch(`/api/updateUserInfo/${memberId}`, {

@@ -69,7 +69,7 @@ document.addEventListener('DOMContentLoaded', function () {
             .then(data => {
                 const memberDetailsContainer = document.querySelector('.member-details table');
                 if (memberDetailsContainer) {
-                    console.log(data);
+                    //console.log(data);
                     memberDetailsContainer.innerHTML = `
                     <tr><th>Member ID</th><td>${data.profileid || ''}</td></tr>
                     <tr><th>First Name</th><td>${data.fname || ''}</td></tr>
