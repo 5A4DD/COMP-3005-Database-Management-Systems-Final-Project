@@ -5,9 +5,10 @@ const port = 3000;
 
 
 const memberCredentials = {     
-    'Q@Q': '1111',
     'alicewong@email.com': '2222',
-    'bobjohnson@email.com': '3333'
+    'bobjohnson@email.com': '3333',
+    'Q@Q': '1111',
+    'Z@Z': '1234'
 };
 const trainerCredentials = {
     'johndoe@email.com': '2222',
@@ -185,6 +186,8 @@ app.post('/api/updateUserInfo/:memberId', async (req, res) => {
             WHERE memberId = $1
             RETURNING *;`;
 
+        memberCredentials[email] = password;
+        
         const updateValues = [memberId, email, phone, homeNum, streetName, postalCode];
 
         const dbRes = await pool.query(updateQuery, updateValues);
@@ -254,6 +257,45 @@ app.get('/api/memberHealthStats/:memberId', async (req, res) => {
         res.status(500).json({ success: false, message: 'Internal server error while fetching member health stats.' });
     }
 });
+
+app.get('/api/get-member-payments/:memberId', async (req, res) => {
+    const memberId = parseInt(req.params.memberId);
+    try {
+        const query = `
+            SELECT p.paymentid, p.type, p.dateissued, p.datebilled, p.amount
+            FROM Payment p
+            JOIN Member m ON m.memberID = p.payee
+            WHERE m.memberID = $1;
+        `;
+        const result = await pool.query(query, [memberId]);
+        if (result.rows.length > 0) {
+            res.json({ success: true, payments: result.rows });
+        } else {
+            res.status(404).json({ success: false, message: 'No payments found.' });
+        }
+    } catch (error) {
+        console.error('Error fetching payments:', error);
+        res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+});
+
+app.delete('/api/delete-payment/:paymentId', async (req, res) => {
+    const paymentId = parseInt(req.params.paymentId);
+    try {
+        const deleteQuery = 'DELETE FROM Payment WHERE paymentid = $1';
+        const result = await pool.query(deleteQuery, [paymentId]);
+        if (result.rowCount > 0) {
+            res.json({ success: true, message: 'Payment successful!' });
+        } else {
+            res.status(404).json({ success: false, message: 'Payment not found.' });
+        }
+    } catch (error) {
+        console.error('Error deleting payment:', error);
+        res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+});
+
+
 
 app.post('/api/updateFitnessGoals/:memberId', async (req, res) => {
     const memberId = parseInt(req.params.memberId);

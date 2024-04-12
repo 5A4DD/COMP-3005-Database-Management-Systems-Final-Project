@@ -52,6 +52,52 @@ function fetchAndDisplayHealthStats(memberId) {
         .catch(error => console.error('Error fetching health stats:', error));
 }
 
+function fetchAndDisplayPayments(memberId) {
+    fetch(`/api/get-member-payments/${memberId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const paymentBody = document.getElementById('paymentBody');
+                paymentBody.innerHTML = ''; 
+                data.payments.forEach(payment => {
+                    const row = document.createElement('tr');
+                    row.setAttribute('id', `payment-${payment.paymentid}`);
+                    row.innerHTML = `
+                        <td>${payment.type}</td>
+                        <td>${payment.dateissued.split('T')[0]}</td>
+                        <td>${payment.datebilled.split('T')[0]}</td>
+                        <td>${payment.amount}</td>
+                        <td><button onclick="deletePayment(${payment.paymentid})">Pay Now</button></td>
+                    `;
+                    paymentBody.appendChild(row);
+                });
+            } else {
+                console.error('Failed to fetch payments:', data.message);
+            }
+        })
+        .catch(error => console.error('Error fetching payments:', error));
+}
+
+function deletePayment(paymentId) {
+    fetch(`/api/delete-payment/${paymentId}`, {
+        method: 'DELETE'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Payment successfully deleted!');
+            const row = document.getElementById(`payment-${paymentId}`);
+            if (row) {
+                row.remove(); // Remove the payment row from the table
+            }
+        } else {
+            alert('Failed to delete payment: ' + data.message);
+        }
+    })
+    .catch(error => console.error('Error deleting payment:', error));
+}
+
+
 document.addEventListener('DOMContentLoaded', function () {
     console.log('Document loaded.');
     const memberId = localStorage.getItem('memberId');
@@ -60,6 +106,7 @@ document.addEventListener('DOMContentLoaded', function () {
         fetchAndDisplayRoutines(memberId);
         fetchAndDisplayAchievements(memberId);
         fetchAndDisplayHealthStats(memberId);
+        fetchAndDisplayPayments(memberId);
     }
 
     const registerForm = document.getElementById('registerForm');
@@ -255,41 +302,41 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // //updating member info in profile.html
-    // const updateForm = document.getElementById('updateUserInfoForm');
-    // updateForm.addEventListener('submit', function(e) {
-    //     e.preventDefault();
+    //updating member info in profile.html
+    const updateForm = document.getElementById('updateUserInfoForm');
+    updateForm.addEventListener('submit', function(e) {
+        e.preventDefault();
 
-    //     const formData = {
-    //         email: document.getElementById('updateEmail').value,
-    //         phone: document.getElementById('updatePhone').value,
-    //         homeNum: document.getElementById('updateHomeNum').value,
-    //         streetName: document.getElementById('updateStreetName').value,
-    //         postalCode: document.getElementById('updatePostalCode').value,
-    //     };
+        const formData = {
+            email: document.getElementById('updateEmail').value,
+            phone: document.getElementById('updatePhone').value,
+            homeNum: document.getElementById('updateHomeNum').value,
+            streetName: document.getElementById('updateStreetName').value,
+            postalCode: document.getElementById('updatePostalCode').value,
+        };
 
-    //     // Assuming you store memberId or a similar identifier in localStorage or another client-side storage
-    //     const memberId = localStorage.getItem('memberId');
+        //assuming you store memberId or a similar identifier in localStorage or another client-side storage
+        const memberId = localStorage.getItem('memberId');
 
-    //     fetch(`/api/updateUserInfo/${memberId}`, {
-    //         method: 'POST',
-    //         headers: {
-    //             'Content-Type': 'application/json',
-    //         },
-    //         body: JSON.stringify(formData),
-    //     })
-    //     .then(response => response.json())
-    //     .then(data => {
-    //         if(data.success) {
-    //             alert('Member information updated successfully.');
-    //         } else {
-    //             alert('Failed to update profile: ' + data.message);
-    //         }
-    //     })
-    //     .catch(error => {
-    //         console.error('Error updating profile:', error);
-    //     });
-    // });
+        fetch(`/api/updateUserInfo/${memberId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if(data.success) {
+                alert('Member information updated successfully.');
+            } else {
+                alert('Failed to update profile: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error updating profile:', error);
+        });
+    });
 
     const fitnessGoalsForm = document.getElementById('updateFitnessGoalsForm');
     if (fitnessGoalsForm) {
