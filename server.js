@@ -186,7 +186,8 @@ app.post('/api/updateUserInfo/:memberId', async (req, res) => {
             WHERE memberId = $1
             RETURNING *;`;
 
-        memberCredentials[email] = password;
+        
+        //memberCredentials[email] = password;
         
         const updateValues = [memberId, email, phone, homeNum, streetName, postalCode];
 
