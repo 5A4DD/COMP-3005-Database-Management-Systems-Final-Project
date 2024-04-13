@@ -295,8 +295,6 @@ app.delete('/api/delete-payment/:paymentId', async (req, res) => {
     }
 });
 
-
-
 app.post('/api/updateFitnessGoals/:memberId', async (req, res) => {
     const memberId = parseInt(req.params.memberId);
     const { targetWeight, targetPace, targetBodyFat } = req.body;

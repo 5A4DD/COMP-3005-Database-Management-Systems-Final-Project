@@ -1,14 +1,36 @@
-//MAKE SURE TO CHANGE THE COMMENT FORAMT TO MORE HUMAN LIKE OR HIDE THE COMMIT CHANGES ON GITBHUB (SEARCH IT UP HOW TO CREATE NEW BRANCH AND MOVE STUFF OVER BLABLABLA)
+COMP 3005 - Final Project Version B
+
+Group:
+    Anas Abushaikha         101 285 962
+    Jason Shao              101 219 526
+    Saad Rizwan             
 
 
-
-# COMP3005_PROJECT
-
-To run the server
-    1. NOTE: INSTALL NODE STUFF
-    2. npm install pg
+VIDEO DEMONSTRATION:
+    https://www.youtube.com/watch?v=s7SuXfN4nrI 
 
 
-To connect to the database as a user (to edit)
-    1.  Name:       FromTheTop
-        Password:  MAKEITDROP
+INSTALL INSTRUCTIONS:
+    1. install node.js
+    2. npm install
+
+
+LAUNCH INSTRUCTIONS:
+    1. node server.js
+
+DATABASE CONNECTION:
+    Database is hosted on the cloud via Heroku
+    All connection info is already included and should connect successfully upon running the server
+
+TESTING INSTRUCTIONS:
+
+                Username                    Password
+-----------------------------------------------------
+    Member:     alicewong@email.com         2222
+                bobjohnson@email.com        3333
+                Q@Q                         1111
+            
+    Trainer:    johndoe@email.com           2222
+                janesmith@email.com         3333
+
+    Admin:      charlieadmin@email.com      6969

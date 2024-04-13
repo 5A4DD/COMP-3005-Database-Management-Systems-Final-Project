@@ -88,7 +88,7 @@ function deletePayment(paymentId) {
             alert('Payment successfully deleted!');
             const row = document.getElementById(`payment-${paymentId}`);
             if (row) {
-                row.remove(); // Remove the payment row from the table
+                row.remove(); //remove the payment row from the table
             }
         } else {
             alert('Failed to delete payment: ' + data.message);

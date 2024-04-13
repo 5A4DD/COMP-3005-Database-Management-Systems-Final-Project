@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', function () {
     const availabilityForm = document.getElementById('availabilityForm');
     const searchForm = document.querySelector('form[action="/search-member"]');
-  
+
     if (availabilityForm) {
         availabilityForm.addEventListener('submit', function (e) {
             e.preventDefault();
@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 formData[day + '_out'] = document.querySelector(`input[name="${day}_out"]`).value;
                 formData[day + '_allday'] = document.querySelector(`input[name="${day}_allday"]`).checked ? 'allday' : '';
             });
-  
+
             fetch('/submit-availability', {
                 method: 'POST',
                 headers: {
@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', function () {
             })
             .catch(error => {
                 console.error('Error during setting availability:', error);
-               
+            
                 alert('Failed to update availability: ' + (error.data ? error.data.message : 'Unknown error'));
             });
         });
