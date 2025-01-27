@@ -1,9 +1,9 @@
 COMP 3005 - Final Project Version B
 
 Group:
-    Anas Abushaikha         101 285 962
-    Jason Shao              101 219 526
-    Saad Rizwan             101 256 477
+    Anas Abushaikha         
+    Jason Shao             
+    Saad Rizwan             
 
 
 VIDEO DEMONSTRATION:
